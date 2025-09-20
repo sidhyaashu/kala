@@ -1,21 +1,38 @@
 // File: app/page.tsx
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn } from "@/lib/auth"; // Correct import
+import { AlertTriangle } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { use } from "react";
 
-export default function LandingPage() {
-  // This is the Server Action that will handle the form submission
-  async function handleSignIn(formData: FormData) {
-    "use server";
-    // The signIn function from lib/auth.ts correctly handles FormData
-    await signIn("credentials", formData);
-  }
+
+export default function LandingPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+
+  const { error } = use(searchParams);
+  const hasError = error === "CredentialsSignin";
+
+async function handleSignIn(formData: FormData) {
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  await signIn("credentials", {
+    email,
+    password,
+    redirect: true,
+    callbackUrl: "/dashboard",
+  });
+}
+
 
   return (
     <main className="flex-grow">
+      {error && (
+        <p className="text-red-500 mb-4">Invalid email or password</p>
+      )}
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center text-white p-4">
         <div
@@ -39,7 +56,18 @@ export default function LandingPage() {
                 </CardDescription>
             </CardHeader>
             <CardContent>
+                {/* The form calls the server action directly. */}
                 <form action={handleSignIn} className="space-y-4">
+                    
+                    {/* START: Improved Error Message Display */}
+                    {error && (
+                        <div className="bg-red-500/30 border border-red-500/50 text-red-200 text-sm p-3 rounded-md flex items-center gap-2">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span>Sign-in failed. Please check your password.</span>
+                        </div>
+                    )}
+                    {/* END: Error Message Display */}
+
                     <div className="text-left">
                         <Label htmlFor="email">Email</Label>
                         <Input 
@@ -65,7 +93,7 @@ export default function LandingPage() {
                         </p>
                     </div>
 
-                    <Button size="lg" className="w-full bg-amber-500 text-black hover:bg-amber-400 font-bold text-lg py-3">
+                    <Button type="submit" size="lg" className="w-full bg-amber-500 text-black hover:bg-amber-400 font-bold text-lg py-3">
                         Enter Your Workshop ✨
                     </Button>
                 </form>
