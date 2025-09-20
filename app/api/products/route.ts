@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, description, price, tags, artisanNotes } = body;
+    const { name, description, price, tags, artisanNotes, imageUrl } = body;
 
     if (!name || !price) {
       return NextResponse.json({ error: 'Name and price are required' }, { status: 400 });
@@ -18,6 +18,7 @@ export async function POST(request: Request) {
         price: Math.round(price),
         tags,
         artisanNotes,
+        imageUrl,
         status: 'DRAFT',
       },
     });
