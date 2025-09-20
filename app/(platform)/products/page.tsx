@@ -1,3 +1,4 @@
+// File: app/(platform)/products/page.tsx
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle } from "lucide-react";
@@ -16,7 +17,8 @@ export default function ProductsPage() {
         <div>
             <div className="flex items-center justify-between">
                 <h1 className="text-lg font-semibold md:text-2xl">My Products</h1>
-                <Link href="/dashboard/products/new">
+                {/* CORRECTED THE HREF PATH HERE */}
+                <Link href="/products/new">
                     <Button className="gap-1">
                         <PlusCircle className="h-4 w-4" />
                         Add New Product

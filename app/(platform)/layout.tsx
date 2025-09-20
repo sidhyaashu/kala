@@ -1,15 +1,13 @@
+// File: app/(platform)/layout.tsx
 import {
   Home,
   Package,
   PlusCircle,
-  Settings,
-  LogOut,
   Menu,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { auth, signOut } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 
 export default async function PlatformLayout({
@@ -17,12 +15,11 @@ export default async function PlatformLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
-
+  // CORRECTED THE HREF PATHS HERE
   const navItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
-    { href: "/dashboard/products", icon: Package, label: "My Products" },
-    { href: "/dashboard/products/new", icon: PlusCircle, label: "Add New Product" },
+    { href: "/products", icon: Package, label: "My Products" },
+    { href: "/products/new", icon: PlusCircle, label: "Add New Product" },
   ];
 
   const SidebarContent = () => (
@@ -46,17 +43,6 @@ export default async function PlatformLayout({
           ))}
         </nav>
       </div>
-       <div className="mt-auto p-4">
-        <form action={async () => {
-            'use server'
-            await signOut({ redirectTo: '/' })
-          }}>
-          <Button size="sm" variant="outline" className="w-full justify-start gap-3">
-             <LogOut className="h-4 w-4" />
-             Sign Out
-          </Button>
-        </form>
-      </div>
     </div>
   );
 
@@ -79,7 +65,7 @@ export default async function PlatformLayout({
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1 text-right font-semibold">
-            Hello, {session?.user?.name ?? "Artisan"}
+            Hello, Sidhya
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-gray-50/50">

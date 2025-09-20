@@ -1,3 +1,4 @@
+// File: app/(platform)/dashboard/page.tsx
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -8,14 +9,15 @@ export default function DashboardPage() {
     <div>
        <div className="flex items-center justify-between">
          <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
-         <Link href="/dashboard/products/new">
+         {/* CORRECTED THE HREF PATH HERE */}
+         <Link href="/products/new">
             <Button className="gap-1">
                 <PlusCircle className="h-4 w-4" />
                 Add New Product
             </Button>
          </Link>
        </div>
-
+       {/* ... rest of the component is the same */}
        <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-3 mt-6">
         <Card>
             <CardHeader>
