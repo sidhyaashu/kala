@@ -1,103 +1,78 @@
-import Image from "next/image";
+// File: app/page.tsx
 
-export default function Home() {
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { signIn } from "@/lib/auth"; // Correct import
+
+export default function LandingPage() {
+  // This is the Server Action that will handle the form submission
+  async function handleSignIn(formData: FormData) {
+    "use server";
+    // The signIn function from lib/auth.ts correctly handles FormData
+    await signIn("credentials", formData);
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <main className="flex-grow">
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center text-white p-4">
+        <div
+          className="absolute inset-0 bg-cover bg-center brightness-[.4]"
+          style={{ backgroundImage: "url(https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?q=80&w=2670&auto=format&fit=crop)" }}
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-orange-600/50" />
+        <div className="relative z-10 text-center">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
+            From Your Hands to the World's Hearts.
+          </h1>
+          <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto">
+            Let our AI assistant handle the marketing, storytelling, and sales, so you can focus on your craft.
+          </p>
+          
+          <Card className="max-w-md mx-auto mt-8 bg-black/40 backdrop-blur-md border-white/20 text-white">
+            <CardHeader>
+                <CardTitle>Welcome, Artisan! Sign In</CardTitle>
+                <CardDescription className="text-gray-300">
+                    Enter your details to access your dashboard.
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form action={handleSignIn} className="space-y-4">
+                    <div className="text-left">
+                        <Label htmlFor="email">Email</Label>
+                        <Input 
+                            name="email" 
+                            id="email" 
+                            type="email" 
+                            placeholder="artisan@example.com" 
+                            required 
+                            className="bg-white/10 border-white/20 placeholder:text-gray-400 mt-1"
+                        />
+                    </div>
+                    <div className="text-left">
+                        <Label htmlFor="password">Password</Label>
+                        <Input 
+                            name="password" 
+                            id="password" 
+                            type="password" 
+                            required 
+                            className="bg-white/10 border-white/20 mt-1"
+                        />
+                        <p className="text-xs text-gray-400 mt-2">
+                            For this demo, use any email and the password: `password`
+                        </p>
+                    </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+                    <Button size="lg" className="w-full bg-amber-500 text-black hover:bg-amber-400 font-bold text-lg py-3">
+                        Enter Your Workshop ✨
+                    </Button>
+                </form>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      </section>
+    </main>
   );
 }

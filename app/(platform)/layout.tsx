@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { auth, signOut } from "@/lib/auth";
+import { Toaster } from "@/components/ui/sonner";
 
 export default async function PlatformLayout({
   children,
@@ -22,14 +23,13 @@ export default async function PlatformLayout({
     { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/dashboard/products", icon: Package, label: "My Products" },
     { href: "/dashboard/products/new", icon: PlusCircle, label: "Add New Product" },
-    { href: "/dashboard/settings", icon: Settings, label: "Settings" },
   ];
 
   const SidebarContent = () => (
     <div className="flex h-full max-h-screen flex-col gap-2">
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
-          <span className="text-primary font-bold">Artisan AI</span>
+          <span className="text-purple-600 font-bold">Artisan AI</span>
         </Link>
       </div>
       <div className="flex-1">
@@ -86,6 +86,7 @@ export default async function PlatformLayout({
           {children}
         </main>
       </div>
+      <Toaster richColors />
     </div>
   );
 }
