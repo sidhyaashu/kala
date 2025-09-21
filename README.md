@@ -202,8 +202,8 @@ To run this project locally, you will need to set up the required environment va
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url>
-cd <repo-name>
+git clone https://github.com/sidhyaashu/kala.git
+cd kala
 ```
 
 ### 2. Install dependencies
