@@ -17,15 +17,14 @@ import { ChatCreator } from "@/components/chat-creator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// --- UPDATED Type Definitions ---
 type AIGeneratedData = {
   title: string;
   description: string;
   tags: string[];
   suggestedPrice: number;
   photoTip?: string; 
-  colorPalette?: string[]; // New field
-  marketTrends?: string; // New field
+  colorPalette?: string[]; 
+  marketTrends?: string; 
 };
 
 type ProductFormData = {
@@ -35,12 +34,10 @@ type ProductFormData = {
     aiData: AIGeneratedData | null;
 }
 
-// --- Component ---
 export default function NewProductPage() {
   const router = useRouter();
   const inputFileRef = useRef<HTMLInputElement>(null);
   
-  // --- State Management ---
   const [step, setStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -53,13 +50,13 @@ export default function NewProductPage() {
     aiData: null,
   });
 
-  // --- Functions (No changes in logic) ---
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
-    setFormData(prev => ({ ...prev, aiData: null })); // Reset AI data on new image upload
+    setFormData(prev => ({ ...prev, aiData: null, story: '', minPrice: 0 }));
+    setStep(1); // Reset to step 1 on new image upload
     try {
       const response = await fetch(`/api/upload?filename=${file.name}`, {
         method: 'POST',
@@ -139,7 +136,6 @@ export default function NewProductPage() {
      }
   }
 
-  // --- Render ---
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -178,7 +174,7 @@ export default function NewProductPage() {
         </CardContent>
       </Card>
 
-      {/* Step 2: Choose Method */}
+      {/* Step 2: Choose Method (Form or Chat) */}
       {formData.imageUrl && (
         <Tabs defaultValue="form" className="mt-6">
           <Card>
@@ -191,8 +187,8 @@ export default function NewProductPage() {
                 </TabsList>
               </CardHeader>
               <CardContent>
+                {/* METHOD 1: QUICK FORM */}
                 <TabsContent value="form">
-                    {/* Method 1: The Original Form */}
                     {step === 1 && (
                       <form onSubmit={handleGenerate} className="grid gap-4 pt-4 border-t">
                         <div>
@@ -237,8 +233,6 @@ export default function NewProductPage() {
                                                 </CardContent>
                                             </Card>
                                        )}
-                                       
-                                       {/* --- NEW UI FOR TRENDS AND COLORS --- */}
                                        {formData.aiData?.colorPalette && formData.aiData.colorPalette.length > 0 && (
                                            <Card className="bg-purple-50 border-purple-200">
                                                 <CardContent className="pt-6">
@@ -252,9 +246,7 @@ export default function NewProductPage() {
                                                                             <TooltipTrigger asChild>
                                                                                 <div className="h-8 w-8 rounded-full border shadow-sm" style={{ backgroundColor: color }} />
                                                                             </TooltipTrigger>
-                                                                            <TooltipContent>
-                                                                                <p>{color}</p>
-                                                                            </TooltipContent>
+                                                                            <TooltipContent><p>{color}</p></TooltipContent>
                                                                         </Tooltip>
                                                                     </TooltipProvider>
                                                                 ))}
@@ -268,57 +260,26 @@ export default function NewProductPage() {
                                                 </CardContent>
                                            </Card>
                                        )}
-
-                                       <div>
-                                            <Label>Generated Product Title</Label>
-                                            <Input value={formData.aiData?.title} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, title: e.target.value}}))} />
-                                       </div>
-                                       <div>
-                                            <Label>SEO-Friendly Description</Label>
-                                            <Textarea value={formData.aiData?.description} rows={6} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, description: e.target.value}}))} />
-                                       </div>
-                                       <div>
-                                            <Label>Keywords / Tags</Label>
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {formData.aiData?.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
-                                            </div>
-                                       </div>
-                                        <div>
-                                            <Label>Pricing Suggestion</Label>
-                                            <p className="text-xl font-bold text-primary">₹ {formData.aiData?.suggestedPrice}</p>
-                                            <p className="text-xs text-muted-foreground">Your minimum was ₹{formData.minPrice}.</p>
-                                       </div>
+                                       <div><Label>Generated Product Title</Label><Input value={formData.aiData?.title} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, title: e.target.value}}))} /></div>
+                                       <div><Label>SEO-Friendly Description</Label><Textarea value={formData.aiData?.description} rows={6} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, description: e.target.value}}))} /></div>
+                                       <div><Label>Keywords / Tags</Label><div className="flex flex-wrap gap-2 mt-2">{formData.aiData?.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}</div></div>
+                                       <div><Label>Pricing Suggestion</Label><p className="text-xl font-bold text-primary">₹ {formData.aiData?.suggestedPrice}</p><p className="text-xs text-muted-foreground">Your minimum was ₹{formData.minPrice}.</p></div>
                                     </div>
                                   )}
-                                  <div className="flex gap-4 pt-4 border-t">
-                                     <Button variant="outline" onClick={() => setStep(1)} disabled={isGenerating}>
-                                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Form
-                                     </Button>
-                                     <Button onClick={() => setStep(3)} disabled={isGenerating}>
-                                        {isGenerating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait...</> : "Looks Good, Next Step"}
-                                     </Button>
-                                  </div>
+                                  <div className="flex gap-4 pt-4 border-t"><Button variant="outline" onClick={() => setStep(1)} disabled={isGenerating}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button><Button onClick={() => setStep(3)} disabled={isGenerating}>{isGenerating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait...</> : "Looks Good, Next Step"}</Button></div>
                                 </>
                             )}
                             {step === 3 && (
                                 <div>
                                   <p className="mb-4 text-sm text-muted-foreground">Your product is ready to be saved as a draft. You can publish it from the 'My Products' page.</p>
-                                   <div className="flex gap-4 pt-4 border-t">
-                                     <Button variant="outline" onClick={() => setStep(2)} disabled={isSaving}>
-                                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Edit
-                                     </Button>
-                                     <Button onClick={handleSaveDraft} disabled={isSaving} className="bg-green-600 hover:bg-green-700">
-                                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                                        {isSaving ? "Saving..." : "Save as Draft"}
-                                     </Button>
-                                  </div>
+                                   <div className="flex gap-4 pt-4 border-t"><Button variant="outline" onClick={() => setStep(2)} disabled={isSaving}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Edit</Button><Button onClick={handleSaveDraft} disabled={isSaving} className="bg-green-600 hover:bg-green-700">{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}{isSaving ? "Saving..." : "Save as Draft"}</Button></div>
                                 </div>
                             )}
                         </div>
                     )}
                 </TabsContent>
+                {/* METHOD 2: GUIDED CHAT */}
                 <TabsContent value="chat">
-                    {/* Method 2: Conversational Chat */}
                     <div className="pt-4 border-t">
                         <ChatCreator imageUrl={formData.imageUrl} />
                     </div>

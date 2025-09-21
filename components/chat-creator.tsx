@@ -6,19 +6,11 @@ import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Bot, Loader2, Send, User } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
 
 type ChatMessage = {
   role: 'user' | 'model';
   parts: { text: string }[];
 };
-
-type ProductDetails = {
-    title: string;
-    description: string;
-    tags: string[];
-    suggestedPrice: number;
-}
 
 export function ChatCreator({ imageUrl }: { imageUrl: string }) {
   const router = useRouter();
@@ -32,29 +24,32 @@ export function ChatCreator({ imageUrl }: { imageUrl: string }) {
 
   const startConversation = async () => {
     setIsLoading(true);
-    const initialPrompt = "Let's create a new product listing. First, please tell me the story behind your creation.";
+    // This is the first message the user sees, hardcoded for consistency.
+    const initialPrompt = "Let's create a new product listing. To start, please tell me the story behind your creation. What makes it special?";
     
-    // Simulate the AI's first message
     setHistory([{ role: 'model', parts: [{ text: initialPrompt }] }]);
     setIsLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentMessage.trim()) return;
+    if (!currentMessage.trim() || isLoading) return;
 
     setIsLoading(true);
-
     const userMessage: ChatMessage = { role: 'user', parts: [{ text: currentMessage }] };
-    let finalMessage = currentMessage;
+    let finalMessageToApi = currentMessage;
 
     // Logic to structure the final message to the AI
     if (!story) {
+        // This is the first user reply, so it's the story
         setStory(currentMessage);
     } else {
+        // This is the second user reply, so it's the price.
+        // Now we have all the info we need.
         setMinPrice(Number(currentMessage));
-        // This is the final piece of info. Bundle everything for the AI.
-        finalMessage = JSON.stringify({
+        
+        // Bundle everything into a JSON string for the API's final step.
+        finalMessageToApi = JSON.stringify({
             story,
             minPrice: Number(currentMessage),
             imageUrl, // Include the image URL for context
@@ -68,8 +63,12 @@ export function ChatCreator({ imageUrl }: { imageUrl: string }) {
     try {
         const response = await fetch('/api/chat-create-product', {
             method: 'POST',
-            body: JSON.stringify({ history: newHistory, message: finalMessage }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ history: newHistory, message: finalMessageToApi }),
         });
+        
+        if (!response.ok) throw new Error("The AI chat service failed.");
+        
         const data = await response.json();
 
         if (data.status === 'COMPLETED') {
@@ -77,14 +76,14 @@ export function ChatCreator({ imageUrl }: { imageUrl: string }) {
             toast.success("Product created successfully via chat!");
             setTimeout(() => {
                 router.push('/products');
-                router.refresh();
+                router.refresh(); // Refresh server components on the target page
             }, 2000);
         } else {
             setHistory(prev => [...prev, { role: 'model', parts: [{ text: data.reply }] }]);
         }
 
     } catch (error) {
-        toast.error("An error occurred. Please try again.");
+        toast.error("An error occurred with the AI chat. Please try again.");
         console.error(error);
     } finally {
         setIsLoading(false);
@@ -94,10 +93,10 @@ export function ChatCreator({ imageUrl }: { imageUrl: string }) {
   if (history.length === 0) {
     return (
         <div className="text-center">
-            <p className="mb-4">Alternatively, create your product through a guided chat with our AI assistant.</p>
+            <p className="mb-4 text-sm text-muted-foreground">Prefer a guided experience? Create your product by chatting with our AI assistant.</p>
             <Button onClick={startConversation} disabled={isLoading}>
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Start Chat with AI
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Bot className="mr-2 h-4 w-4" />}
+                Start Guided Chat
             </Button>
         </div>
     );
@@ -110,7 +109,7 @@ export function ChatCreator({ imageUrl }: { imageUrl: string }) {
                 <div key={index} className={`flex items-start gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}>
                     {msg.role === 'model' && <Bot className="h-6 w-6 text-primary shrink-0" />}
                     <div className={`p-3 rounded-lg max-w-sm ${msg.role === 'model' ? 'bg-background' : 'bg-primary text-primary-foreground'}`}>
-                        <p className="text-sm">{msg.parts[0].text}</p>
+                        <p className="text-sm whitespace-pre-line">{msg.parts[0].text}</p>
                     </div>
                     {msg.role === 'user' && <User className="h-6 w-6 shrink-0" />}
                 </div>
@@ -130,8 +129,14 @@ export function ChatCreator({ imageUrl }: { imageUrl: string }) {
                 rows={1}
                 className="flex-grow resize-none"
                 disabled={isLoading}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                    }
+                }}
             />
-            <Button type="submit" size="icon" disabled={isLoading}>
+            <Button type="submit" size="icon" disabled={isLoading || !currentMessage.trim()}>
                 <Send className="h-4 w-4" />
             </Button>
         </form>

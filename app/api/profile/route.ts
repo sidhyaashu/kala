@@ -18,18 +18,18 @@ export async function GET() {
         where: { id: "main_artisan" },
     });
     if (!profile) {
-        // Return a default empty state if no profile exists
-        return NextResponse.json({ name: '', storyNotes: '' });
+        // Return a default empty state if no profile exists yet
+        return NextResponse.json({ name: '', storyNotes: '', profileImage: '' });
     }
     return NextResponse.json(profile);
 }
 
-// POST function to update profile and generate AI bio
+// POST function to update profile and generate the AI biography
 export async function POST(request: Request) {
     const { name, storyNotes, profileImage } = await request.json();
 
     if (!name || !storyNotes) {
-        return NextResponse.json({ error: "Name and story are required." }, { status: 400 });
+        return NextResponse.json({ error: "Name and story notes are required." }, { status: 400 });
     }
 
     try {
@@ -48,6 +48,7 @@ export async function POST(request: Request) {
 
         const { bio } = JSON.parse(responseText.replace(/```json|```/g, '').trim());
 
+        // Use upsert: update if exists, create if not.
         const updatedProfile = await prisma.artisanProfile.upsert({
             where: { id: "main_artisan" },
             update: { name, storyNotes, bio, profileImage },

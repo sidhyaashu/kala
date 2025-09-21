@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { PlusCircle, Eye } from "lucide-react";
 import prisma from "@/lib/prisma";
-import { AiSuggestions } from "@/components/ai-suggestions"; // Import the new component
+import { AiSuggestions } from "@/components/ai-suggestions";
 
 async function getDashboardStats() {
     const products = await prisma.product.findMany();
@@ -24,6 +24,7 @@ export default async function DashboardPage() {
             <h1 className="text-2xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground">Welcome back, here's a summary of your shop.</p>
          </div>
+         {/* --- UPDATED BUTTONS --- */}
          <div className="flex items-center gap-2">
             <Link href="/artisan/main_artisan" target="_blank">
                 <Button variant="outline" className="gap-2">

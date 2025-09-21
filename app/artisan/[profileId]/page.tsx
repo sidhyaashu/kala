@@ -2,12 +2,11 @@
 import prisma from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { Metadata } from 'next';
 import { UserCircle, Brush } from "lucide-react";
 
-// CORRECT: Define the Props type locally for this specific page.
 type Props = {
   params: { profileId: string }
 }
@@ -53,7 +52,7 @@ export default async function ArtisanPage({ params }: Props) {
                 <Card className="overflow-hidden shadow-lg">
                     <div className="relative h-48 md:h-64 bg-gradient-to-r from-purple-50 to-orange-50">
                         <Image 
-                            src="https://images.unsplash.com/photo-1528629291221-c39c35544d66?q=80&w=2670&auto=format&fit=crop" 
+                            src="https://images.unsplash.com/photo-1528629291221-c39c35544d66?q=80&w=2670&auto-format&fit=crop" 
                             alt="Artisan cover" 
                             fill 
                             className="object-cover opacity-50"
@@ -79,9 +78,9 @@ export default async function ArtisanPage({ params }: Props) {
                     <div className="lg:col-span-1">
                         <div className="sticky top-8">
                             <Card className="shadow-lg h-fit">
-                                <CardContent className="p-6">
-                                    <h2 className="text-xl font-semibold mb-4">About the Artisan</h2>
-                                    <p className="text-muted-foreground whitespace-pre-line leading-relaxed">{profile.bio || "Story coming soon."}</p>
+                                <CardHeader><CardTitle>About the Artisan</CardTitle></CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground whitespace-pre-line leading-relaxed">{profile.bio || "Story coming soon. The artisan can add this from their settings page."}</p>
                                 </CardContent>
                             </Card>
                         </div>
@@ -89,12 +88,12 @@ export default async function ArtisanPage({ params }: Props) {
 
                     {/* Products Section */}
                     <div className="lg:col-span-2">
-                        <h2 className="text-2xl font-bold mb-4">Creations</h2>
+                        <h2 className="text-2xl font-bold mb-6">Creations</h2>
                         {liveProducts.length > 0 ? (
                             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
                                 {liveProducts.map(product => (
                                     <Link key={product.id} href={`/product/${product.id}`} className="block">
-                                        <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group h-full">
+                                        <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group h-full flex flex-col">
                                             <div className="relative w-full aspect-square bg-muted">
                                                 {product.imageUrl ? (
                                                     <Image 
@@ -105,12 +104,10 @@ export default async function ArtisanPage({ params }: Props) {
                                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                                                     />
                                                 ) : (
-                                                    <div className="flex h-full items-center justify-center text-muted-foreground">
-                                                        <Brush />
-                                                    </div>
+                                                    <div className="flex h-full items-center justify-center text-muted-foreground"><Brush /></div>
                                                 )}
                                             </div>
-                                            <CardContent className="p-4">
+                                            <CardContent className="p-4 flex-grow">
                                                 <h3 className="font-semibold line-clamp-1">{product.name}</h3>
                                                 <p className="text-lg font-bold text-primary">₹ {product.price.toLocaleString('en-IN')}</p>
                                             </CardContent>

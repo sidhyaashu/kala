@@ -54,7 +54,8 @@ export async function POST(request: Request) {
       
       // Save the final product to the database
       const { title, description, tags, suggestedPrice } = jsonResponse.productDetails;
-      const { story, minPrice, imageUrl } = JSON.parse(message); // Extract details from the final user message
+      // The final user message contains all the bundled data
+      const { story, minPrice, imageUrl } = JSON.parse(message); 
 
       await prisma.product.create({
         data: {

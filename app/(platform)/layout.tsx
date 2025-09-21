@@ -3,14 +3,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Toaster } from "@/components/ui/sonner";
-import { Home, Package, PlusCircle, Menu, Settings } from "lucide-react";
+import { Home, Package, PlusCircle, Menu, Settings } from "lucide-react"; // Import Settings icon
 
 export default async function PlatformLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // CORRECTED THE HREF PATHS HERE
+
 const navItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/products", icon: Package, label: "My Products" },

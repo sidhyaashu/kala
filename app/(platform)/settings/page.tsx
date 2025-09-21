@@ -102,17 +102,17 @@ export default function SettingsPage() {
                             This information will be used by our AI to create your beautiful, public-facing artisan page.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6 pt-6">
+                    <CardContent className="space-y-6 pt-6 border-t">
                         <div className="flex items-center gap-6">
                              <Input id="profileImage" type="file" ref={inputFileRef} onChange={handleFileChange} className="hidden" accept="image/*"/>
-                             <button type="button" onClick={() => inputFileRef.current?.click()} disabled={isUploading} className="relative h-24 w-24 rounded-full group bg-muted flex items-center justify-center">
+                             <button type="button" onClick={() => inputFileRef.current?.click()} disabled={isUploading} className="relative h-24 w-24 rounded-full group bg-muted flex items-center justify-center shrink-0">
                                 {profile.profileImage ? (
                                     <Image src={profile.profileImage} alt="Profile" fill className="rounded-full object-cover" />
                                 ) : (
                                     <UserCircle className="h-12 w-12 text-muted-foreground" />
                                 )}
                                 <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {isUploading ? <Loader2 className="h-6 w-6 animate-spin text-white"/> : <span className="text-white text-xs font-semibold">Change</span>}
+                                    {isUploading ? <Loader2 className="h-6 w-6 animate-spin text-white"/> : <span className="text-white text-xs font-semibold text-center">Change Photo</span>}
                                 </div>
                              </button>
                              <div className="flex-grow">
@@ -122,22 +122,24 @@ export default function SettingsPage() {
                                     value={profile.name}
                                     onChange={(e) => setProfile(p => ({...p, name: e.target.value}))}
                                     placeholder="e.g., Priya Sharma Pottery"
+                                    required
                                 />
                              </div>
                         </div>
                         <div>
-                            <Label htmlFor="story">Your Story</Label>
+                            <Label htmlFor="story">Your Story Notes for the AI</Label>
                             <Textarea 
                                 id="story"
                                 value={profile.storyNotes}
                                 onChange={(e) => setProfile(p => ({...p, storyNotes: e.target.value}))}
-                                placeholder="Tell us about yourself, your craft, your history, and what inspires you..."
+                                placeholder="Tell us about yourself, your craft, your history, and what inspires you... The more details, the better your AI-generated bio will be!"
                                 rows={8}
+                                required
                             />
                         </div>
                         <Button type="submit" disabled={isSaving || isUploading}>
                             {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                            Save Profile
+                            {isSaving ? 'Saving...' : 'Save and Generate Bio'}
                         </Button>
                     </CardContent>
                 </Card>
