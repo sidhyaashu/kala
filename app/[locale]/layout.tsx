@@ -1,3 +1,4 @@
+// File: app/[locale]/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
@@ -14,7 +15,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// This is correct and necessary.
 export function generateStaticParams() {
   return [{ locale: 'en' }, { locale: 'hi' }];
 }
@@ -31,12 +31,10 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { locale: string };
 }>) {
-  // This pattern is correct for Next.js 15.
+  // CRITICAL for Next.js 15: The 'params' object must be awaited
+  // before you can access its properties.
   const { locale } = await params;
 
-  // THIS IS THE CRITICAL CHANGE:
-  // We explicitly pass the resolved `locale` to `getMessages`.
-  // This removes any ambiguity and ensures the correct message file is loaded.
   const messages = await getMessages({ locale });
 
   return (

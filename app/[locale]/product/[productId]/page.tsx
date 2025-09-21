@@ -1,133 +1,120 @@
-// File: app/artisan/[profileId]/page.tsx
+// File: app/[locale]/product/[productId]/page.tsx
 import prisma from "@/lib/prisma";
 import Image from "next/image";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
 import { notFound } from "next/navigation";
 import { Metadata } from 'next';
-import { UserCircle, Brush } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
-// CORRECT: Define the Props type locally for this specific page.
-// Do NOT import it from 'next/script'.
+// Define the correct Props type for this page
 type Props = {
-  params: { profileId: string }
+  params: { productId: string; locale: string }
 }
 
 // --- Dynamic Metadata Generation ---
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const profile = await prisma.artisanProfile.findUnique({
-    where: { id: params.profileId },
+  const product = await prisma.product.findUnique({
+    where: { id: params.productId },
   });
- 
-  if (!profile || !profile.name) {
+
+  if (!product) {
     return {
-      title: "Artisan Not Found",
-      description: "The requested artisan profile could not be found.",
+      title: "Product Not Found",
+      description: "The requested product could not be found.",
     }
   }
- 
+
   return {
-    title: `${profile.name} | Artisan Showcase`,
-    description: profile.bio?.substring(0, 150) + '...' || `Discover the handcrafted creations by ${profile.name}.`,
+    title: `${product.name} | Kala AI`,
+    description: product.description?.substring(0, 150) + '...' || `Purchase ${product.name}, a unique handcrafted item.`,
   }
 }
 
 // --- Page Component ---
-export default async function ArtisanPage({ params }: Props) { // Use the locally defined Props type here
-    const profile = await prisma.artisanProfile.findUnique({
-        where: { id: params.profileId },
+export default async function ProductPage({ params }: Props) {
+    const product = await prisma.product.findUnique({
+        where: { id: params.productId },
     });
 
-    if (!profile || !profile.name) {
+    // If no product is found, render the 404 page
+    if (!product) {
         notFound();
     }
 
-    const liveProducts = await prisma.product.findMany({
-        where: { status: 'LIVE' },
-        orderBy: { createdAt: 'desc' },
+    const artisan = await prisma.artisanProfile.findUnique({
+        where: { id: "main_artisan" },
     });
 
     return (
         <div className="bg-gray-50 min-h-screen">
+            <header className="bg-white border-b">
+                <div className="container mx-auto p-4 flex justify-between items-center">
+                    <Link href={`/${params.locale}/dashboard`}>
+                        <Button variant="outline" className="gap-2">
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Dashboard
+                        </Button>
+                    </Link>
+                    <Link href={`/${params.locale}/artisan/main_artisan`} className="text-purple-600 font-bold">
+                        Artisan AI
+                    </Link>
+                </div>
+            </header>
             <main className="container mx-auto p-4 md:p-8">
-                {/* --- Header Section --- */}
-                <Card className="overflow-hidden shadow-lg">
-                    <div className="relative h-48 md:h-64 bg-gradient-to-r from-purple-50 to-orange-50">
-                        <Image 
-                            src="https://images.unsplash.com/photo-1528629291221-c39c35544d66?q=80&w=2670&auto=format&fit=crop" 
-                            alt="Artisan cover" 
-                            fill 
-                            className="object-cover opacity-50"
-                            priority
-                        />
-                    </div>
-                    <CardContent className="p-6 text-center -mt-16 z-10 relative">
-                        <div className="relative h-32 w-32 rounded-full mx-auto border-4 border-white shadow-md bg-muted flex items-center justify-center">
-                            {profile.profileImage ? (
-                                <Image src={profile.profileImage} alt={profile.name || 'Artisan'} fill className="rounded-full object-cover" />
-                            ) : (
-                                <UserCircle className="h-20 w-20 text-muted-foreground" />
-                            )}
-                        </div>
-                        <h1 className="text-3xl font-bold mt-4">{profile.name}</h1>
-                        <p className="text-muted-foreground mt-1">Local Artisan</p>
-                    </CardContent>
-                </Card>
-
-                {/* --- About & Products Grid --- */}
-                <div className="grid lg:grid-cols-3 gap-8 mt-8">
-                    {/* About Section */}
-                    <div className="lg:col-span-1">
-                        <div className="sticky top-8">
-                            <Card className="shadow-lg h-fit">
-                                <CardContent className="p-6">
-                                    <h2 className="text-xl font-semibold mb-4">About the Artisan</h2>
-                                    <p className="text-muted-foreground whitespace-pre-line leading-relaxed">{profile.bio || "Story coming soon."}</p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-
-                    {/* Products Section */}
-                    <div className="lg:col-span-2">
-                        <h2 className="text-2xl font-bold mb-4">Creations</h2>
-                        {liveProducts.length > 0 ? (
-                            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                                {liveProducts.map(product => (
-                                    <Link key={product.id} href={`/product/${product.id}`} className="block">
-                                        <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group h-full">
-                                            <div className="relative w-full aspect-square bg-muted">
-                                                {product.imageUrl ? (
-                                                    <Image 
-                                                        src={product.imageUrl} 
-                                                        alt={product.name} 
-                                                        fill 
-                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                                    />
-                                                ) : (
-                                                    <div className="flex h-full items-center justify-center text-muted-foreground">
-                                                        <Brush />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <CardContent className="p-4">
-                                                <h3 className="font-semibold line-clamp-1">{product.name}</h3>
-                                                <p className="text-lg font-bold text-primary">₹ {product.price.toLocaleString('en-IN')}</p>
-                                            </CardContent>
-                                        </Card>
-                                    </Link>
-                                ))}
-                            </div>
+                <Card className="grid md:grid-cols-2 gap-8 lg:gap-12 p-6 md:p-8 overflow-hidden shadow-lg">
+                    {/* Image Section */}
+                    <div className="relative aspect-square bg-muted rounded-lg">
+                        {product.imageUrl ? (
+                            <Image
+                                src={product.imageUrl}
+                                alt={product.name}
+                                fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="object-cover rounded-lg"
+                                priority
+                            />
                         ) : (
-                            <Card className="flex flex-col items-center justify-center text-center p-12 min-h-[400px]">
-                                <Brush size={48} className="text-muted-foreground mb-4" />
-                                <h3 className="text-xl font-semibold">Creations Coming Soon!</h3>
-                                <p className="text-muted-foreground mt-2 max-w-sm">This artisan is busy crafting their next masterpiece. Check back soon to see their collection.</p>
-                            </Card>
+                            <div className="flex h-full items-center justify-center text-muted-foreground">
+                                No Image Available
+                            </div>
                         )}
                     </div>
-                </div>
+
+                    {/* Details Section */}
+                    <div className="flex flex-col justify-center space-y-4">
+                        <div>
+                            {artisan?.name && (
+                                <Link href={`/${params.locale}/artisan/main_artisan`} className="text-sm text-muted-foreground hover:underline">
+                                    By {artisan.name}
+                                </Link>
+                            )}
+                            <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
+                            <p className="text-2xl font-semibold text-primary mt-2">
+                                ₹ {product.price.toLocaleString('en-IN')}
+                            </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-4 border-t">
+                            {product.tags.map(tag => (
+                                <Badge key={tag} variant="secondary">{tag}</Badge>
+                            ))}
+                        </div>
+
+                        <p className="text-muted-foreground leading-relaxed">
+                            {product.description || "No description provided."}
+                        </p>
+
+                        <div className="pt-4">
+                            <Button size="lg" className="w-full gap-2">
+                                <ShoppingCart className="h-5 w-5" />
+                                Add to Cart (Coming Soon)
+                            </Button>
+                        </div>
+                    </div>
+                </Card>
             </main>
         </div>
     );
