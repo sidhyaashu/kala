@@ -5,6 +5,9 @@ import { VertexAI } from "@google-cloud/vertexai";
 const vertex_ai = new VertexAI({
   project: process.env.GOOGLE_PROJECT_ID!,
   location: "us-central1",
+  googleAuthOptions: {
+    credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS!),
+  }
 });
 
 const model = process.env.MODEL as string;

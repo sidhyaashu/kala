@@ -6,14 +6,16 @@ import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
-import { Product, ProductCardActions } from "@/components/product-card-actions";
+// We only import the component itself, not the type from the client file.
+import { ProductCardActions } from "@/components/product-card-actions";
 
+// Revalidate this page every 60 seconds to fetch fresh data
 export const revalidate = 60;
 
-
 export default async function ProductsPage() {
-    // SOLUTION: Explicitly type the result from Prisma
-    const products: Product[] = await prisma.product.findMany({
+    // SOLUTION: Remove the incorrect type assertion. 
+    // Let TypeScript infer the type from Prisma, where `createdAt` is a Date object.
+    const products = await prisma.product.findMany({
         orderBy: {
             createdAt: 'desc',
         },
@@ -40,7 +42,7 @@ export default async function ProductsPage() {
                 </Card>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
-                    {/* The 'product' parameter below is now correctly typed */}
+                    {/* The 'product' parameter is now correctly inferred as Prisma's Product type */}
                     {products.map((product) => (
                         <Card key={product.id} className="flex flex-col overflow-hidden">
                             <div className="relative w-full h-48 bg-muted">
@@ -76,13 +78,12 @@ export default async function ProductsPage() {
                                     </p>
                                 </CardContent>
                                 {/* 
-                                  Now passing a server 'product' object to the client component.
-                                  Next.js will serialize it (e.g., product.createdAt: Date -> string).
-                                  Our client component correctly expects this.
+                                  SOLUTION: The conversion from Date to string happens here, at the boundary.
+                                  This creates a new object that matches the type expected by the client component.
                                 */}
                                 <ProductCardActions product={{
                                     ...product,
-                                    createdAt: product.createdAt.toString(),
+                                    createdAt: product.createdAt.toISOString(), // Use toISOString() for a standard string format
                                 }} />
                             </div>
                         </Card>
