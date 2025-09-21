@@ -5,24 +5,24 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from "./ui/alert-dialog";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from "./ui/dialog";
 import { Copy, Loader2, Share2, Trash2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
@@ -30,7 +30,7 @@ import { CardFooter } from "./ui/card";
 
 export type Product = {
   id: string;
-  createdAt: string; 
+  createdAt: string;
   name: string;
   description: string | null;
   price: number;
@@ -82,7 +82,7 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
       setIsPublishing(false);
     }
   };
-  
+
   const generateMarketingPost = async () => {
     if (marketingPost) return;
     setIsGeneratingPost(true);
@@ -111,11 +111,15 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: product.name, description: product.description }),
         });
-        if (!response.ok) throw new Error("Failed to generate image.");
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to generate image.");
+        }
         const data = await response.json();
         setPromoImage(data.imageBase64);
     } catch (error) {
-        toast.error("AI failed to generate image. Please try again.");
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        toast.error(`AI Error: ${errorMessage}`);
     } finally {
         setIsGeneratingImage(false);
     }

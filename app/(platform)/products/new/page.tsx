@@ -10,18 +10,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, CheckCircle2, Bot, MessageSquare, Image as ImageIcon, Loader2, Wand2, X } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Bot, Palette, TrendingUp, Camera, Image as ImageIcon, Loader2, Wand2, X } from "lucide-react";
 import { toast } from "sonner";
 import type { PutBlobResult } from '@vercel/blob';
 import { ChatCreator } from "@/components/chat-creator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// --- Type Definitions ---
+// --- UPDATED Type Definitions ---
 type AIGeneratedData = {
   title: string;
   description: string;
   tags: string[];
   suggestedPrice: number;
+  photoTip?: string; 
+  colorPalette?: string[]; // New field
+  marketTrends?: string; // New field
 };
 
 type ProductFormData = {
@@ -49,12 +53,13 @@ export default function NewProductPage() {
     aiData: null,
   });
 
-  // --- Functions (No changes needed here) ---
+  // --- Functions (No changes in logic) ---
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     setIsUploading(true);
+    setFormData(prev => ({ ...prev, aiData: null })); // Reset AI data on new image upload
     try {
       const response = await fetch(`/api/upload?filename=${file.name}`, {
         method: 'POST',
@@ -141,7 +146,7 @@ export default function NewProductPage() {
          <h1 className="text-lg font-semibold md:text-2xl">Add New Product</h1>
       </div>
 
-      {/* --- Step 1: Image Upload --- */}
+      {/* Step 1: Image Upload */}
       <Card className="mt-6">
         <CardHeader>
           <CardTitle>Step 1: Upload Your Masterpiece</CardTitle>
@@ -156,7 +161,7 @@ export default function NewProductPage() {
                       <p className="font-semibold text-green-800">Image Uploaded!</p>
                       <p className="text-xs text-muted-foreground truncate max-w-xs md:max-w-md">{formData.imageUrl.split('/').pop()}</p>
                   </div>
-                   <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground shrink-0" onClick={() => setFormData(prev => ({...prev, imageUrl: ''}))}>
+                   <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground shrink-0" onClick={() => setFormData(prev => ({...prev, imageUrl: '', aiData: null}))}>
                       <X className="h-5 w-5" />
                   </Button>
               </div>
@@ -173,7 +178,7 @@ export default function NewProductPage() {
         </CardContent>
       </Card>
 
-      {/* --- Step 2: Choose Method (Tabs UI) --- */}
+      {/* Step 2: Choose Method */}
       {formData.imageUrl && (
         <Tabs defaultValue="form" className="mt-6">
           <Card>
@@ -187,7 +192,7 @@ export default function NewProductPage() {
               </CardHeader>
               <CardContent>
                 <TabsContent value="form">
-                    {/* --- Method 1: The Original Form --- */}
+                    {/* Method 1: The Original Form */}
                     {step === 1 && (
                       <form onSubmit={handleGenerate} className="grid gap-4 pt-4 border-t">
                         <div>
@@ -198,8 +203,9 @@ export default function NewProductPage() {
                           <Label htmlFor="min-price">Your Minimum Price (₹)</Label>
                           <Input id="min-price" type="number" onChange={(e) => setFormData(prev => ({...prev, minPrice: Number(e.target.value)}))} required placeholder="e.g., 1800"/>
                         </div>
-                        <Button type="submit" disabled={isUploading}>
-                           <Wand2 className="mr-2 h-4 w-4" /> Generate with AI
+                        <Button type="submit" disabled={isUploading || isGenerating}>
+                           {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                           {isGenerating ? "Analyzing..." : "Generate with AI"}
                         </Button>
                       </form>
                     )}
@@ -214,9 +220,55 @@ export default function NewProductPage() {
                                       <Skeleton className="h-20 w-full" />
                                       <div className="flex gap-2"> <Skeleton className="h-6 w-20" /> <Skeleton className="h-6 w-24" /> <Skeleton className="h-6 w-20" /> </div>
                                       <Skeleton className="h-8 w-1/2" />
+                                      <Skeleton className="h-24 w-full" />
                                     </div>
                                   ) : (
-                                    <div className="space-y-4">
+                                    <div className="space-y-6">
+                                       {formData.aiData?.photoTip && (
+                                            <Card className="bg-amber-50 border-amber-200">
+                                                <CardContent className="pt-6">
+                                                    <div className="flex items-start gap-3">
+                                                        <Camera className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                                                        <div>
+                                                            <h4 className="font-semibold">Photography Tip</h4>
+                                                            <p className="text-sm text-muted-foreground">{formData.aiData.photoTip}</p>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                       )}
+                                       
+                                       {/* --- NEW UI FOR TRENDS AND COLORS --- */}
+                                       {formData.aiData?.colorPalette && formData.aiData.colorPalette.length > 0 && (
+                                           <Card className="bg-purple-50 border-purple-200">
+                                                <CardContent className="pt-6">
+                                                    <div className="flex flex-col md:flex-row md:items-start gap-4">
+                                                        <div className="flex-shrink-0">
+                                                            <h4 className="font-semibold flex items-center gap-2"><Palette className="h-4 w-4 text-purple-600" /> Dominant Colors</h4>
+                                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                                {formData.aiData.colorPalette.map(color => (
+                                                                    <TooltipProvider key={color}>
+                                                                        <Tooltip>
+                                                                            <TooltipTrigger asChild>
+                                                                                <div className="h-8 w-8 rounded-full border shadow-sm" style={{ backgroundColor: color }} />
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                <p>{color}</p>
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    </TooltipProvider>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex-grow">
+                                                            <h4 className="font-semibold flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-600" /> Market Insight</h4>
+                                                            <p className="text-sm text-muted-foreground mt-2">{formData.aiData?.marketTrends}</p>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                           </Card>
+                                       )}
+
                                        <div>
                                             <Label>Generated Product Title</Label>
                                             <Input value={formData.aiData?.title} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, title: e.target.value}}))} />
@@ -266,7 +318,7 @@ export default function NewProductPage() {
                     )}
                 </TabsContent>
                 <TabsContent value="chat">
-                    {/* --- Method 2: Conversational Chat --- */}
+                    {/* Method 2: Conversational Chat */}
                     <div className="pt-4 border-t">
                         <ChatCreator imageUrl={formData.imageUrl} />
                     </div>

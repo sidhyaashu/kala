@@ -1,4 +1,4 @@
-// File: app/api/generate-promo-image/route.ts
+// File: pp/api/generate-promo-image/route.ts
 import { NextResponse } from 'next/server';
 import { VertexAI } from '@google-cloud/vertexai';
 
@@ -8,6 +8,7 @@ const vertex_ai = new VertexAI({
   googleAuthOptions: { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS!) }
 });
 
+// IMPORTANT: Note that we are using the 'preview' namespace for Imagen models
 const model = process.env.MODEL_IMAGEN as string;
 const generativeModel = vertex_ai.preview.getGenerativeModel({ model });
 
@@ -19,27 +20,27 @@ export async function POST(request: Request) {
   }
 
   const prompt = `
-    A vibrant and elegant promotional graphic for an artisan's product. 
-    Product Name: "${name}". 
+    A vibrant and elegant promotional graphic for an artisan's product.
+    Product Name: "${name}".
     Description: "${description}".
     The style should be a beautiful, eye-catching studio shot with a soft, warm, and slightly blurred background, highlighting the product's handcrafted quality. The lighting should be professional and warm. The final image should look minimalist, clean, and premium.
   `;
 
   try {
     const result = await generativeModel.generateContent(prompt);
-    
-    // --- SOLUTION: Add a guard clause to safely handle the response ---
+
+    // Add a guard clause to safely handle cases where the response is blocked by safety filters
     if (!result.response.candidates || result.response.candidates.length === 0) {
-      // This can happen if the content is blocked by safety filters
       console.error("Imagen response blocked or empty. Response:", JSON.stringify(result.response));
       throw new Error("The AI model did not return a valid response, it may have been blocked.");
     }
 
     const response = result.response.candidates[0];
 
-    // @ts-ignore - The type definitions might not be perfectly up-to-date for this preview feature
+    // The image data is in a specific field; we use @ts-ignore as types might not be fully updated
+    // @ts-ignore
     const imageBase64 = response.customPrediction?.bytesBase64Encoded;
-    
+
     if (!imageBase64) {
       throw new Error("Imagen did not return a valid image in the response payload.");
     }
