@@ -1,4 +1,3 @@
-// File: app/[locale]/(platform)/logistics/page.tsx
 "use client";
 
 import { useState } from 'react';
@@ -7,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { IndianRupee, Loader2, Map, Milestone, Ship, Timer } from 'lucide-react';
+import { IndianRupee, Loader2, Map, Milestone, Ship, Timer, AlertCircle } from 'lucide-react';
 
 type RouteDetails = {
   origin: string;
@@ -78,7 +77,7 @@ export default function LogisticsPage() {
                 required
               />
             </div>
-            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
+            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto shrink-0">
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Map className="mr-2 h-4 w-4" />}
               {isLoading ? 'Calculating...' : 'Calculate'}
             </Button>
@@ -88,6 +87,7 @@ export default function LogisticsPage() {
 
       {error && (
         <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -97,6 +97,7 @@ export default function LogisticsPage() {
         <Card className="animate-in fade-in-50">
           <CardHeader>
             <CardTitle>Optimized Route Details</CardTitle>
+            <CardDescription>From: {routeDetails.origin}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <InfoBox icon={Milestone} title="Distance" value={routeDetails.distance} />
@@ -110,10 +111,10 @@ export default function LogisticsPage() {
   );
 }
 
-// A small helper component for displaying info boxes
+// Helper component for info boxes
 function InfoBox({ icon: Icon, title, value, className }: { icon: React.ElementType, title: string, value: string, className?: string }) {
   return (
-    <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+    <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg border">
       <Icon className="h-8 w-8 text-primary shrink-0" />
       <div>
         <p className="text-sm text-muted-foreground">{title}</p>

@@ -1,4 +1,3 @@
-// File: app/(platform)/settings/page.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -7,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Save, UserCircle } from "lucide-react";
+import { Loader2, Save, UserCircle, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import type { PutBlobResult } from '@vercel/blob';
@@ -36,6 +35,8 @@ export default function SettingsPage() {
                         storyNotes: data.storyNotes || '',
                         profileImage: data.profileImage || ''
                     });
+                } else {
+                   throw new Error("Failed to fetch profile");
                 }
             } catch (error) {
                 toast.error("Failed to load profile information.");
@@ -85,7 +86,11 @@ export default function SettingsPage() {
     };
 
     if (isLoading) {
-        return <div className="flex justify-center items-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        return (
+            <div className="flex justify-center items-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
     }
 
     return (
@@ -105,13 +110,13 @@ export default function SettingsPage() {
                     <CardContent className="space-y-6 pt-6 border-t">
                         <div className="flex items-center gap-6">
                              <Input id="profileImage" type="file" ref={inputFileRef} onChange={handleFileChange} className="hidden" accept="image/*"/>
-                             <button type="button" onClick={() => inputFileRef.current?.click()} disabled={isUploading} className="relative h-24 w-24 rounded-full group bg-muted flex items-center justify-center shrink-0">
+                             <button type="button" onClick={() => inputFileRef.current?.click()} disabled={isUploading} className="relative h-24 w-24 rounded-full group bg-muted flex items-center justify-center shrink-0 border-2 border-dashed hover:border-primary transition-colors">
                                 {profile.profileImage ? (
                                     <Image src={profile.profileImage} alt="Profile" fill className="rounded-full object-cover" />
                                 ) : (
                                     <UserCircle className="h-12 w-12 text-muted-foreground" />
                                 )}
-                                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                     {isUploading ? <Loader2 className="h-6 w-6 animate-spin text-white"/> : <span className="text-white text-xs font-semibold text-center">Change Photo</span>}
                                 </div>
                              </button>
@@ -137,9 +142,9 @@ export default function SettingsPage() {
                                 required
                             />
                         </div>
-                        <Button type="submit" disabled={isSaving || isUploading}>
-                            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                            {isSaving ? 'Saving...' : 'Save and Generate Bio'}
+                        <Button type="submit" disabled={isSaving || isUploading} size="lg">
+                            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                            {isSaving ? 'Saving...' : 'Save & Generate Bio'}
                         </Button>
                     </CardContent>
                 </Card>

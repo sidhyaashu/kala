@@ -1,4 +1,3 @@
-// File: app/api/products/[id]/route.ts
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
@@ -9,8 +8,16 @@ export async function PATCH(
 ) {
   try {
     const { id } = params;
+    if (!id) {
+        return NextResponse.json({ error: "Product ID is required." }, { status: 400 });
+    }
+
     const body = await request.json();
     const { status } = body;
+
+    if (!status) {
+        return NextResponse.json({ error: "Status is required." }, { status: 400 });
+    }
 
     const updatedProduct = await prisma.product.update({
       where: { id },
@@ -31,6 +38,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = params;
+     if (!id) {
+        return NextResponse.json({ error: "Product ID is required." }, { status: 400 });
+    }
 
     await prisma.product.delete({
       where: { id },

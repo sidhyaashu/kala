@@ -10,12 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, CheckCircle2, Bot, Palette, TrendingUp, Camera, Image as ImageIcon, Loader2, Wand2, X } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Bot, Palette, TrendingUp, Camera, Image as ImageIcon, Loader2, Wand2, X, Info } from "lucide-react";
 import { toast } from "sonner";
 import type { PutBlobResult } from '@vercel/blob';
 import { ChatCreator } from "@/components/chat-creator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 type AIGeneratedData = {
   title: string;
@@ -137,13 +139,13 @@ export default function NewProductPage() {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
          <h1 className="text-lg font-semibold md:text-2xl">Add New Product</h1>
       </div>
 
       {/* Step 1: Image Upload */}
-      <Card className="mt-6">
+      <Card>
         <CardHeader>
           <CardTitle>Step 1: Upload Your Masterpiece</CardTitle>
           <CardDescription>A great photo is the first step to telling your product's story.</CardDescription>
@@ -151,15 +153,11 @@ export default function NewProductPage() {
         <CardContent>
           <Input id="photos" type="file" ref={inputFileRef} onChange={handleFileChange} className="hidden" accept="image/*"/>
           {formData.imageUrl ? (
-              <div className="flex items-center gap-4 p-4 border rounded-lg bg-green-500/10 border-green-500/20">
-                  <CheckCircle2 className="h-10 w-10 text-green-600 shrink-0" />
-                  <div className="flex-grow">
-                      <p className="font-semibold text-green-800">Image Uploaded!</p>
-                      <p className="text-xs text-muted-foreground truncate max-w-xs md:max-w-md">{formData.imageUrl.split('/').pop()}</p>
-                  </div>
-                   <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground shrink-0" onClick={() => setFormData(prev => ({...prev, imageUrl: '', aiData: null}))}>
-                      <X className="h-5 w-5" />
-                  </Button>
+              <div className="relative group">
+                <Image src={formData.imageUrl} alt="Uploaded product" width={400} height={400} className="w-full h-auto max-h-96 object-contain rounded-lg border bg-muted" />
+                <button type="button" className="absolute top-2 right-2 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setFormData(prev => ({...prev, imageUrl: '', aiData: null}))}>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
           ) : (
               <button type="button" className="w-full h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center hover:bg-muted transition-colors disabled:opacity-50" onClick={() => inputFileRef.current?.click()} disabled={isUploading}>
@@ -176,7 +174,7 @@ export default function NewProductPage() {
 
       {/* Step 2: Choose Method (Form or Chat) */}
       {formData.imageUrl && (
-        <Tabs defaultValue="form" className="mt-6">
+        <Tabs defaultValue="form" className="animate-in fade-in-50">
           <Card>
               <CardHeader>
                 <CardTitle>Step 2: Describe Your Creation</CardTitle>
@@ -186,11 +184,11 @@ export default function NewProductPage() {
                   <TabsTrigger value="chat"><Bot className="mr-2 h-4 w-4" />Guided Chat</TabsTrigger>
                 </TabsList>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6 border-t">
                 {/* METHOD 1: QUICK FORM */}
                 <TabsContent value="form">
                     {step === 1 && (
-                      <form onSubmit={handleGenerate} className="grid gap-4 pt-4 border-t">
+                      <form onSubmit={handleGenerate} className="grid gap-4">
                         <div>
                           <Label htmlFor="story">Your Story & Details</Label>
                           <Textarea id="story" value={formData.story} onChange={(e) => setFormData(prev => ({...prev, story: e.target.value}))} required placeholder="e.g., This vase is made from the clay of my village river..."/>
@@ -199,90 +197,78 @@ export default function NewProductPage() {
                           <Label htmlFor="min-price">Your Minimum Price (₹)</Label>
                           <Input id="min-price" type="number" onChange={(e) => setFormData(prev => ({...prev, minPrice: Number(e.target.value)}))} required placeholder="e.g., 1800"/>
                         </div>
-                        <Button type="submit" disabled={isUploading || isGenerating}>
+                        <Button type="submit" disabled={isUploading || isGenerating} size="lg">
                            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                            {isGenerating ? "Analyzing..." : "Generate with AI"}
                         </Button>
                       </form>
                     )}
                     {step > 1 && (
-                        <div className="space-y-6 pt-4 border-t">
+                        <div className="space-y-6">
                             <CardTitle>Step 3: Review & Save</CardTitle>
-                            {step === 2 && (
-                                <>
-                                  {isGenerating ? (
-                                    <div className="space-y-4">
-                                      <Skeleton className="h-8 w-3/4" />
-                                      <Skeleton className="h-20 w-full" />
-                                      <div className="flex gap-2"> <Skeleton className="h-6 w-20" /> <Skeleton className="h-6 w-24" /> <Skeleton className="h-6 w-20" /> </div>
-                                      <Skeleton className="h-8 w-1/2" />
-                                      <Skeleton className="h-24 w-full" />
-                                    </div>
-                                  ) : (
-                                    <div className="space-y-6">
-                                       {formData.aiData?.photoTip && (
-                                            <Card className="bg-amber-50 border-amber-200">
-                                                <CardContent className="pt-6">
-                                                    <div className="flex items-start gap-3">
-                                                        <Camera className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                                                        <div>
-                                                            <h4 className="font-semibold">Photography Tip</h4>
-                                                            <p className="text-sm text-muted-foreground">{formData.aiData.photoTip}</p>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                       )}
-                                       {formData.aiData?.colorPalette && formData.aiData.colorPalette.length > 0 && (
-                                           <Card className="bg-purple-50 border-purple-200">
-                                                <CardContent className="pt-6">
-                                                    <div className="flex flex-col md:flex-row md:items-start gap-4">
-                                                        <div className="flex-shrink-0">
-                                                            <h4 className="font-semibold flex items-center gap-2"><Palette className="h-4 w-4 text-purple-600" /> Dominant Colors</h4>
-                                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                                {formData.aiData.colorPalette.map(color => (
-                                                                    <TooltipProvider key={color}>
-                                                                        <Tooltip>
-                                                                            <TooltipTrigger asChild>
-                                                                                <div className="h-8 w-8 rounded-full border shadow-sm" style={{ backgroundColor: color }} />
-                                                                            </TooltipTrigger>
-                                                                            <TooltipContent><p>{color}</p></TooltipContent>
-                                                                        </Tooltip>
-                                                                    </TooltipProvider>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex-grow">
-                                                            <h4 className="font-semibold flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-600" /> Market Insight</h4>
-                                                            <p className="text-sm text-muted-foreground mt-2">{formData.aiData?.marketTrends}</p>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                           </Card>
-                                       )}
-                                       <div><Label>Generated Product Title</Label><Input value={formData.aiData?.title} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, title: e.target.value}}))} /></div>
-                                       <div><Label>SEO-Friendly Description</Label><Textarea value={formData.aiData?.description} rows={6} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, description: e.target.value}}))} /></div>
-                                       <div><Label>Keywords / Tags</Label><div className="flex flex-wrap gap-2 mt-2">{formData.aiData?.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}</div></div>
-                                       <div><Label>Pricing Suggestion</Label><p className="text-xl font-bold text-primary">₹ {formData.aiData?.suggestedPrice}</p><p className="text-xs text-muted-foreground">Your minimum was ₹{formData.minPrice}.</p></div>
-                                    </div>
-                                  )}
-                                  <div className="flex gap-4 pt-4 border-t"><Button variant="outline" onClick={() => setStep(1)} disabled={isGenerating}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button><Button onClick={() => setStep(3)} disabled={isGenerating}>{isGenerating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait...</> : "Looks Good, Next Step"}</Button></div>
-                                </>
+                            {isGenerating ? (
+                              <div className="space-y-4">
+                                <Skeleton className="h-8 w-3/4" />
+                                <Skeleton className="h-20 w-full" />
+                                <div className="flex gap-2"> <Skeleton className="h-6 w-20" /> <Skeleton className="h-6 w-24" /> <Skeleton className="h-6 w-20" /> </div>
+                                <Skeleton className="h-8 w-1/2" />
+                                <Skeleton className="h-24 w-full" />
+                              </div>
+                            ) : (
+                              <div className="space-y-6 animate-in fade-in-50">
+                                 {formData.aiData?.photoTip && (
+                                    <Alert className="bg-amber-50 border-amber-200">
+                                      <Camera className="h-4 w-4 text-amber-600" />
+                                      <AlertTitle className="font-semibold">Photography Tip</AlertTitle>
+                                      <AlertDescription>{formData.aiData.photoTip}</AlertDescription>
+                                    </Alert>
+                                 )}
+                                 {formData.aiData?.colorPalette && formData.aiData.colorPalette.length > 0 && (
+                                    <Card className="bg-purple-50 border-purple-200">
+                                         <CardContent className="pt-6">
+                                             <div className="flex flex-col md:flex-row md:items-start gap-4">
+                                                 <div className="flex-shrink-0">
+                                                     <h4 className="font-semibold flex items-center gap-2"><Palette className="h-4 w-4 text-purple-600" /> Dominant Colors</h4>
+                                                     <div className="flex flex-wrap gap-2 mt-2">
+                                                         {formData.aiData.colorPalette.map(color => (
+                                                             <TooltipProvider key={color}>
+                                                                 <Tooltip>
+                                                                     <TooltipTrigger asChild>
+                                                                         <div className="h-8 w-8 rounded-full border shadow-sm" style={{ backgroundColor: color }} />
+                                                                     </TooltipTrigger>
+                                                                     <TooltipContent><p>{color}</p></TooltipContent>
+                                                                 </Tooltip>
+                                                             </TooltipProvider>
+                                                         ))}
+                                                     </div>
+                                                 </div>
+                                                 <div className="flex-grow">
+                                                     <h4 className="font-semibold flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-600" /> Market Insight</h4>
+                                                     <p className="text-sm text-muted-foreground mt-2">{formData.aiData?.marketTrends}</p>
+                                                 </div>
+                                             </div>
+                                         </CardContent>
+                                    </Card>
+                                 )}
+                                 <div><Label>Generated Product Title</Label><Input value={formData.aiData?.title} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, title: e.target.value}}))} /></div>
+                                 <div><Label>SEO-Friendly Description</Label><Textarea value={formData.aiData?.description} rows={6} onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, description: e.target.value}}))} /></div>
+                                 <div><Label>Keywords / Tags</Label><div className="flex flex-wrap gap-2 mt-2 p-3 bg-muted rounded-md border">{formData.aiData?.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}</div></div>
+                                 <div><Label>Pricing Suggestion</Label><p className="text-xl font-bold text-primary">₹ {formData.aiData?.suggestedPrice.toLocaleString('en-IN')}</p><p className="text-xs text-muted-foreground">Your minimum was ₹{formData.minPrice.toLocaleString('en-IN')}.</p></div>
+                              </div>
                             )}
-                            {step === 3 && (
-                                <div>
-                                  <p className="mb-4 text-sm text-muted-foreground">Your product is ready to be saved as a draft. You can publish it from the 'My Products' page.</p>
-                                   <div className="flex gap-4 pt-4 border-t"><Button variant="outline" onClick={() => setStep(2)} disabled={isSaving}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Edit</Button><Button onClick={handleSaveDraft} disabled={isSaving} className="bg-green-600 hover:bg-green-700">{isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}{isSaving ? "Saving..." : "Save as Draft"}</Button></div>
-                                </div>
-                            )}
+                            <div className="flex gap-4 pt-4 border-t">
+                              <Button variant="outline" onClick={() => setStep(1)} disabled={isGenerating || isSaving}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button>
+                              <Button onClick={handleSaveDraft} disabled={isSaving || isGenerating} className="bg-green-600 hover:bg-green-700">
+                                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                                {isSaving ? "Saving..." : "Save as Draft"}
+                              </Button>
+                            </div>
                         </div>
                     )}
                 </TabsContent>
                 {/* METHOD 2: GUIDED CHAT */}
                 <TabsContent value="chat">
-                    <div className="pt-4 border-t">
-                        <ChatCreator imageUrl={formData.imageUrl} />
-                    </div>
+                    <ChatCreator imageUrl={formData.imageUrl} />
                 </TabsContent>
               </CardContent>
           </Card>

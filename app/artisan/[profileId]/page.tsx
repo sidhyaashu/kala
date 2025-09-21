@@ -1,4 +1,3 @@
-// File: app/artisan/[profileId]/page.tsx
 import prisma from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
@@ -109,7 +108,7 @@ export default async function ArtisanPage({ params }: Props) {
                                             </div>
                                             <CardContent className="p-4 flex-grow">
                                                 <h3 className="font-semibold line-clamp-1">{product.name}</h3>
-                                                <p className="text-lg font-bold text-primary">₹ {product.price.toLocaleString('en-IN')}</p>
+                                                <p className="text-lg font-bold text-primary">₹{product.price.toLocaleString('en-IN')}</p>
                                             </CardContent>
                                         </Card>
                                     </Link>

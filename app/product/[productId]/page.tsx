@@ -1,17 +1,16 @@
-// File: app/[locale]/product/[productId]/page.tsx
 import prisma from "@/lib/prisma";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Metadata } from 'next';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, ArrowLeft } from "lucide-react";
+import { ShoppingCart, ArrowLeft, UserCircle } from "lucide-react";
 import Link from "next/link";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Define the correct Props type for this page
 type Props = {
-  params: { productId: string; locale: string }
+  params: { productId: string; }
 }
 
 // --- Dynamic Metadata Generation ---
@@ -36,10 +35,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // --- Page Component ---
 export default async function ProductPage({ params }: Props) {
     const product = await prisma.product.findUnique({
-        where: { id: params.productId },
+        where: { id: params.productId, status: 'LIVE' }, // Only show LIVE products
     });
 
-    // If no product is found, render the 404 page
     if (!product) {
         notFound();
     }
@@ -50,16 +48,16 @@ export default async function ProductPage({ params }: Props) {
 
     return (
         <div className="bg-gray-50 min-h-screen">
-            <header className="bg-white border-b">
+            <header className="bg-white border-b sticky top-0 z-10">
                 <div className="container mx-auto p-4 flex justify-between items-center">
-                    <Link href={`/${params.locale}/dashboard`}>
+                    <Link href={`/dashboard`}>
                         <Button variant="outline" className="gap-2">
                             <ArrowLeft className="h-4 w-4" />
                             Back to Dashboard
                         </Button>
                     </Link>
-                    <Link href={`/${params.locale}/artisan/main_artisan`} className="text-purple-600 font-bold">
-                        Artisan AI
+                    <Link href={`/artisan/main_artisan`} className="text-purple-600 font-bold">
+                        Kala AI
                     </Link>
                 </div>
             </header>
@@ -87,28 +85,34 @@ export default async function ProductPage({ params }: Props) {
                     <div className="flex flex-col justify-center space-y-4">
                         <div>
                             {artisan?.name && (
-                                <Link href={`/${params.locale}/artisan/main_artisan`} className="text-sm text-muted-foreground hover:underline">
+                                <Link href={`/artisan/main_artisan`} className="flex items-center gap-2 text-sm text-muted-foreground hover:underline mb-2">
+                                    <Avatar className="h-6 w-6">
+                                        <AvatarImage src={artisan.profileImage || ''} />
+                                        <AvatarFallback><UserCircle className="h-4 w-4" /></AvatarFallback>
+                                    </Avatar>
                                     By {artisan.name}
                                 </Link>
                             )}
                             <h1 className="text-3xl md:text-4xl font-bold">{product.name}</h1>
                             <p className="text-2xl font-semibold text-primary mt-2">
-                                ₹ {product.price.toLocaleString('en-IN')}
+                                ₹{product.price.toLocaleString('en-IN')}
                             </p>
                         </div>
 
-                        <div className="flex flex-wrap gap-2 pt-4 border-t">
-                            {product.tags.map(tag => (
-                                <Badge key={tag} variant="secondary">{tag}</Badge>
-                            ))}
-                        </div>
+                        {product.tags && product.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2 pt-4 border-t">
+                              {product.tags.map(tag => (
+                                  <Badge key={tag} variant="secondary">{tag}</Badge>
+                              ))}
+                          </div>
+                        )}
 
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-muted-foreground leading-relaxed pt-4 border-t">
                             {product.description || "No description provided."}
                         </p>
 
                         <div className="pt-4">
-                            <Button size="lg" className="w-full gap-2">
+                            <Button size="lg" className="w-full gap-2" disabled>
                                 <ShoppingCart className="h-5 w-5" />
                                 Add to Cart (Coming Soon)
                             </Button>

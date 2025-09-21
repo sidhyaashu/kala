@@ -14,7 +14,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger
 } from "./ui/alert-dialog";
 import {
   Dialog,
@@ -24,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from "./ui/dialog";
-import { Copy, Loader2, Share2, Trash2 } from "lucide-react";
+import { Copy, Loader2, Share2, Trash2, Wand2 } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { CardFooter } from "./ui/card";
 
@@ -52,12 +51,14 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
   const [marketingPost, setMarketingPost] = useState("");
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [promoImage, setPromoImage] = useState("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       await fetch(`/api/products/${product.id}`, { method: 'DELETE' });
       toast.success("Product deleted successfully.");
+      setIsDeleteDialogOpen(false); // Close dialog on success
       router.refresh();
     } catch (error) {
       toast.error("Failed to delete product.");
@@ -84,7 +85,7 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
   };
 
   const generateMarketingPost = async () => {
-    if (marketingPost) return;
+    if (marketingPost) return; // Don't regenerate if already generated
     setIsGeneratingPost(true);
     try {
         const response = await fetch('/api/generate-marketing-post', {
@@ -126,7 +127,7 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
   }
 
   return (
-    <CardFooter className="flex justify-between items-center pt-6">
+    <CardFooter className="p-0 pt-4 border-t flex justify-between items-center">
       {product.status === 'DRAFT' ? (
         <Button onClick={handlePublish} disabled={isPublishing} className="bg-blue-600 hover:bg-blue-700">
           {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -161,13 +162,13 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
                     {/* Promotional Image Section */}
                     <div>
                         <h3 className="font-semibold mb-2">Promotional Poster</h3>
-                        <div className="relative aspect-square w-full bg-muted rounded-lg flex items-center justify-center">
+                        <div className="relative aspect-square w-full bg-muted rounded-lg flex items-center justify-center border">
                             {isGeneratingImage ? (
                                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                             ) : promoImage ? (
                                 <Image src={`data:image/png;base64,${promoImage}`} alt="AI generated poster" fill className="object-contain rounded-lg" />
                             ) : (
-                                <Button onClick={generatePromoImage}>Generate Poster</Button>
+                                <Button onClick={generatePromoImage}><Wand2 className="mr-2 h-4 w-4" />Generate Poster</Button>
                             )}
                         </div>
                     </div>
@@ -176,16 +177,14 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
         </Dialog>
       )}
 
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 hover:text-red-600">
-                <Trash2 className="h-4 w-4" />
-            </Button>
-        </AlertDialogTrigger>
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <Button onClick={() => setIsDeleteDialogOpen(true)} variant="ghost" size="icon" className="text-red-500 hover:bg-red-50 hover:text-red-600">
+            <Trash2 className="h-4 w-4" />
+        </Button>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>This will permanently delete the product "{product.name}".</AlertDialogDescription>
+            <AlertDialogDescription>This will permanently delete the product "{product.name}". This action cannot be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
