@@ -1,9 +1,11 @@
-// File: app/(platform)/layout.tsx
+// File: app/[locale]/(platform)/layout.tsx
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Toaster } from "@/components/ui/sonner";
-import { Home, Package, PlusCircle, Menu, Settings } from "lucide-react"; // Import Settings icon
+// IMPORT TrendingUp ICON
+import { Home, Package, PlusCircle, Menu, Settings, TrendingUp, Ship } from "lucide-react"; 
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default async function PlatformLayout({
   children,
@@ -13,9 +15,11 @@ export default async function PlatformLayout({
 
 const navItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
+    { href: "/logistics", icon: Ship, label: "Logistics" },
+    { href: "/trends", icon: TrendingUp, label: "Market Trends" },
     { href: "/products", icon: Package, label: "My Products" },
     { href: "/products/new", icon: PlusCircle, label: "Add New Product" },
-    { href: "/settings", icon: Settings, label: "Settings" }, // NEW LINK
+    { href: "/settings", icon: Settings, label: "Settings" },
   ];
 
   const SidebarContent = () => (
@@ -48,20 +52,23 @@ const navItems = [
         <SidebarContent />
       </div>
       <div className="flex flex-col">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6 md:hidden">
-           <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="shrink-0">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col p-0">
-               <SidebarContent />
-            </SheetContent>
-          </Sheet>
-          <div className="w-full flex-1 text-right font-semibold">
-            Hello, Sidhya
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+           <div className="md:hidden">
+             <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex flex-col p-0">
+                 <SidebarContent />
+              </SheetContent>
+            </Sheet>
+           </div>
+          <div className="w-full flex-1 flex items-center justify-end gap-4">
+            <span className="font-semibold hidden md:inline-block">Hello, Sidhya</span>
+            <LanguageSwitcher />
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-gray-50/50">

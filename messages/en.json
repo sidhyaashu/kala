@@ -1,0 +1,18 @@
+{
+  "LandingPage": {
+    "title": "From Your Hands to the World's Hearts.",
+    "subtitle": "Let our AI assistant handle the marketing, storytelling, and sales, so you can focus on your craft.",
+    "button": "Enter Your Workshop ✨"
+  },
+  "Dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back, here's a summary of your shop.",
+    "viewPublicPage": "View Public Page",
+    "addNewProduct": "Add New Product"
+  },
+  "LanguageSwitcher": {
+    "label": "Change language",
+    "en": "English",
+    "hi": "Hindi"
+  }
+}

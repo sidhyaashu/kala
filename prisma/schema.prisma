@@ -24,6 +24,7 @@ model Product {
   tags          String[]
   imageUrl      String?
   artisanNotes  String?
+  category      String?
 }
 
 model ArtisanProfile {

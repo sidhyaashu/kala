@@ -1,19 +1,19 @@
-// File: app/page.tsx
+// File: app/[locale]/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import Loader from "@/components/loader"; // Make sure to create this component
+import Loader from "@/components/loader";
+import { useTranslations } from "next-intl";
 
 export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const t = useTranslations("LandingPage");
 
   const handleEnter = () => {
     setIsLoading(true);
-
-    // Simulate a loading process (e.g., fetching initial data, setting up)
     setTimeout(() => {
       router.push("/dashboard");
     }, 1500);
@@ -23,7 +23,6 @@ export default function LandingPage() {
     <main className="flex-grow relative">
       {isLoading && <Loader />}
       
-      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center text-white p-4">
         <div
           className="absolute inset-0 bg-cover bg-center brightness-[.5]"
@@ -32,10 +31,10 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-orange-600/50" />
         <div className="relative z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-            From Your Hands to the World's Hearts.
+            {t('title')}
           </h1>
           <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto">
-            Let our AI assistant handle the marketing, storytelling, and sales, so you can focus on your craft.
+            {t('subtitle')}
           </p>
           
           <Button 
@@ -43,7 +42,7 @@ export default function LandingPage() {
             size="lg" 
             className="mt-12 w-full max-w-xs bg-amber-500 text-black hover:bg-amber-400 font-bold text-lg py-6 px-8 animate-bounce"
           >
-            Enter Your Workshop ✨
+            {t('button')}
           </Button>
         </div>
       </section>
