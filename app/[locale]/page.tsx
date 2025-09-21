@@ -6,16 +6,18 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/loader";
 import { useTranslations } from "next-intl";
+import { useLocale } from 'next-intl';
 
 export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
+   const locale = useLocale();
   const router = useRouter();
   const t = useTranslations("LandingPage");
 
   const handleEnter = () => {
     setIsLoading(true);
     setTimeout(() => {
-      router.push("/dashboard");
+      router.push(`/${locale}/dashboard`);
     }, 1500);
   };
 
