@@ -18,12 +18,15 @@ const generativeModel = vertex_ai.getGenerativeModel({ model: process.env.MODEL 
 
 export async function POST() {
   try {
+    console.log("--- DEBUGGING SEASONAL SUGGESTIONS API ---");
+    console.log("GOOGLE_PROJECT_ID:", process.env.GOOGLE_PROJECT_ID);
+    console.log("GOOGLE_CREDENTIALS loaded:", !!process.env.GOOGLE_CREDENTIALS);
     // 1. Fetch upcoming holidays from BigQuery Public Dataset
     const query = `
-      SELECT holiday_name, holiday_date
-      FROM \`bigquery-public-data.india_holidays.holidays\`
-      WHERE holiday_date BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL 90 DAY)
-      ORDER BY holiday_date
+      SELECT holiday_name, primary_date
+      FROM \`bigquery-public-data.ml_datasets.holidays_and_events_for_forecasting\`
+      WHERE region = 'IN' AND primary_date BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL 90 DAY)
+      ORDER BY primary_date
       LIMIT 5;
     `;
     const [job] = await bigquery.createQueryJob({ query });
@@ -35,7 +38,7 @@ export async function POST() {
 
     const upcomingHolidays = rows.map(row => ({
       name: row.holiday_name,
-      date: row.holiday_date.value,
+      date: row.primary_date.value,
     }));
 
     // 2. Fetch the artisan's live products from our database

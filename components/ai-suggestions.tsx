@@ -1,3 +1,4 @@
+// File: components/ai-suggestions.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -27,6 +28,9 @@ export function AiSuggestions() {
       try {
         // First, get the products from our own API to pass to the suggestion API
         const productsResponse = await fetch('/api/products');
+        if (!productsResponse.ok) {
+          throw new Error(`Failed to fetch products: ${productsResponse.statusText}`);
+        }
         const products = await productsResponse.json();
 
         const response = await fetch('/api/generate-suggestions', {

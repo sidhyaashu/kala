@@ -1,3 +1,5 @@
+// File: app/artisan/[profileId]/page.tsx
+
 import prisma from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,8 +14,12 @@ type Props = {
 
 // --- Dynamic Metadata Generation ---
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  // FIX: Destructure profileId from params first
+  const { profileId } = params;
+  
   const profile = await prisma.artisanProfile.findUnique({
-    where: { id: params.profileId },
+    // FIX: Use the new variable here
+    where: { id: profileId },
   });
  
   if (!profile || !profile.name) {
@@ -31,8 +37,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // --- Page Component ---
 export default async function ArtisanPage({ params }: Props) {
+    // FIX: Destructure profileId from params first
+    const { profileId } = params;
+
     const profile = await prisma.artisanProfile.findUnique({
-        where: { id: params.profileId },
+        // FIX: Use the new variable here
+        where: { id: profileId },
     });
 
     if (!profile || !profile.name) {
@@ -51,7 +61,7 @@ export default async function ArtisanPage({ params }: Props) {
                 <Card className="overflow-hidden shadow-lg">
                     <div className="relative h-48 md:h-64 bg-gradient-to-r from-purple-50 to-orange-50">
                         <Image 
-                            src="https://images.unsplash.com/photo-1528629291221-c39c35544d66?q=80&w=2670&auto-format&fit=crop" 
+                            src="https://images.unsplash.com/photo-1528629291221-c39c35544d66?q=80&w=2670&auto-format=fit=crop" 
                             alt="Artisan cover" 
                             fill 
                             className="object-cover opacity-50"
