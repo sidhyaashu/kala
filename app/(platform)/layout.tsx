@@ -1,14 +1,9 @@
 // File: app/(platform)/layout.tsx
-import {
-  Home,
-  Package,
-  PlusCircle,
-  Menu,
-} from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Toaster } from "@/components/ui/sonner";
+import { Home, Package, PlusCircle, Menu, Settings } from "lucide-react";
 
 export default async function PlatformLayout({
   children,
@@ -16,10 +11,11 @@ export default async function PlatformLayout({
   children: React.ReactNode;
 }) {
   // CORRECTED THE HREF PATHS HERE
-  const navItems = [
+const navItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/products", icon: Package, label: "My Products" },
     { href: "/products/new", icon: PlusCircle, label: "Add New Product" },
+    { href: "/settings", icon: Settings, label: "Settings" }, // NEW LINK
   ];
 
   const SidebarContent = () => (

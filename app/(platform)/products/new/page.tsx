@@ -4,17 +4,17 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, CheckCircle2, Image as ImageIcon, Loader2, Wand2, X } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Bot, MessageSquare, Image as ImageIcon, Loader2, Wand2, X } from "lucide-react";
 import { toast } from "sonner";
 import type { PutBlobResult } from '@vercel/blob';
-import { Separator } from "@/components/ui/separator";
 import { ChatCreator } from "@/components/chat-creator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // --- Type Definitions ---
 type AIGeneratedData = {
@@ -49,7 +49,7 @@ export default function NewProductPage() {
     aiData: null,
   });
 
-  // --- Functions ---
+  // --- Functions (No changes needed here) ---
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -89,7 +89,7 @@ export default function NewProductPage() {
         body: JSON.stringify({ 
           story: formData.story, 
           minPrice: formData.minPrice,
-          imageUrl: formData.imageUrl // Pass the image URL to the Vision API
+          imageUrl: formData.imageUrl
         }),
       });
 
@@ -125,7 +125,7 @@ export default function NewProductPage() {
 
        toast.success("Product saved as a draft successfully!");
        router.push('/products');
-       router.refresh(); // Important: This tells Next.js to re-fetch the data on the products page
+       router.refresh();
      } catch(error) {
         console.error(error);
         toast.error("Could not save your product. Please try again.");
@@ -137,64 +137,65 @@ export default function NewProductPage() {
   // --- Render ---
   return (
     <div>
-      <h1 className="text-lg font-semibold md:text-2xl">Add New Product</h1>
+      <div className="flex items-center justify-between">
+         <h1 className="text-lg font-semibold md:text-2xl">Add New Product</h1>
+      </div>
+
+      {/* --- Step 1: Image Upload --- */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>
-            {step === 1 && "Create with AI Assistant"}
-            {step === 2 && "Step 2: AI-Powered Generation"}
-            {step === 3 && "Step 3: Review & Save"}
-          </CardTitle>
+          <CardTitle>Step 1: Upload Your Masterpiece</CardTitle>
+          <CardDescription>A great photo is the first step to telling your product's story.</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* --- Image Upload Section (Now shared for both flows) --- */}
-          <div>
-            <Label htmlFor="photos">1. Upload Product Photo</Label>
-            <Input id="photos" type="file" ref={inputFileRef} onChange={handleFileChange} className="hidden" accept="image/*"/>
-            {formData.imageUrl ? (
-                <div className="mt-2 flex items-center gap-3 p-4 border rounded-md bg-green-500/10 border-green-500/20">
-                    <CheckCircle2 className="h-8 w-8 text-green-600" />
-                    <div>
-                        <p className="font-semibold text-green-700">Image Uploaded!</p>
-                        <p className="text-xs text-muted-foreground truncate max-w-xs">{formData.imageUrl.split('/').pop()}</p>
-                    </div>
-                     <Button type="button" size="icon" variant="ghost" className="ml-auto h-7 w-7 text-muted-foreground" onClick={() => setFormData(prev => ({...prev, imageUrl: ''}))}>
-                        <X className="h-4 w-4" />
-                    </Button>
-                </div>
-            ) : (
-                <Button type="button" variant="outline" className="mt-2 w-full h-32 border-dashed flex-col" onClick={() => inputFileRef.current?.click()} disabled={isUploading}>
-                    {isUploading ? <Loader2 className="h-6 w-6 animate-spin" /> : 
-                    <>
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                        <span className="mt-2 text-sm text-muted-foreground">Click to upload photo</span>
-                    </>
-                    }
-                </Button>
-            )}
-          </div>
-
-          {/* Conditional rendering based on image upload */}
-          {formData.imageUrl && (
-            <>
-              <div className="my-8 flex items-center">
-                  <Separator className="flex-grow" />
-                  <span className="mx-4 text-xs font-semibold text-muted-foreground">CHOOSE YOUR METHOD</span>
-                  <Separator className="flex-grow" />
+          <Input id="photos" type="file" ref={inputFileRef} onChange={handleFileChange} className="hidden" accept="image/*"/>
+          {formData.imageUrl ? (
+              <div className="flex items-center gap-4 p-4 border rounded-lg bg-green-500/10 border-green-500/20">
+                  <CheckCircle2 className="h-10 w-10 text-green-600 shrink-0" />
+                  <div className="flex-grow">
+                      <p className="font-semibold text-green-800">Image Uploaded!</p>
+                      <p className="text-xs text-muted-foreground truncate max-w-xs md:max-w-md">{formData.imageUrl.split('/').pop()}</p>
+                  </div>
+                   <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground shrink-0" onClick={() => setFormData(prev => ({...prev, imageUrl: ''}))}>
+                      <X className="h-5 w-5" />
+                  </Button>
               </div>
+          ) : (
+              <button type="button" className="w-full h-40 border-2 border-dashed rounded-lg flex flex-col items-center justify-center hover:bg-muted transition-colors disabled:opacity-50" onClick={() => inputFileRef.current?.click()} disabled={isUploading}>
+                  {isUploading ? <Loader2 className="h-8 w-8 animate-spin text-primary" /> : 
+                  <>
+                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                      <span className="mt-2 font-medium text-muted-foreground">Click to upload photo</span>
+                  </>
+                  }
+              </button>
+          )}
+        </CardContent>
+      </Card>
 
-              <div className="grid md:grid-cols-2 gap-8">
-                  {/* --- Method 1: The Original Form --- */}
-                  <div>
-                    <h3 className="font-semibold mb-4">Method 1: Quick Form</h3>
+      {/* --- Step 2: Choose Method (Tabs UI) --- */}
+      {formData.imageUrl && (
+        <Tabs defaultValue="form" className="mt-6">
+          <Card>
+              <CardHeader>
+                <CardTitle>Step 2: Describe Your Creation</CardTitle>
+                <CardDescription>Choose your preferred method to provide the product details.</CardDescription>
+                <TabsList className="grid w-full grid-cols-2 mt-4">
+                  <TabsTrigger value="form"><Wand2 className="mr-2 h-4 w-4" />Quick Form</TabsTrigger>
+                  <TabsTrigger value="chat"><Bot className="mr-2 h-4 w-4" />Guided Chat</TabsTrigger>
+                </TabsList>
+              </CardHeader>
+              <CardContent>
+                <TabsContent value="form">
+                    {/* --- Method 1: The Original Form --- */}
                     {step === 1 && (
-                      <form onSubmit={handleGenerate} className="grid gap-4">
+                      <form onSubmit={handleGenerate} className="grid gap-4 pt-4 border-t">
                         <div>
-                          <Label htmlFor="story">2. Your Story</Label>
+                          <Label htmlFor="story">Your Story & Details</Label>
                           <Textarea id="story" value={formData.story} onChange={(e) => setFormData(prev => ({...prev, story: e.target.value}))} required placeholder="e.g., This vase is made from the clay of my village river..."/>
                         </div>
                         <div>
-                          <Label htmlFor="min-price">3. Your Minimum Price (₹)</Label>
+                          <Label htmlFor="min-price">Your Minimum Price (₹)</Label>
                           <Input id="min-price" type="number" onChange={(e) => setFormData(prev => ({...prev, minPrice: Number(e.target.value)}))} required placeholder="e.g., 1800"/>
                         </div>
                         <Button type="submit" disabled={isUploading}>
@@ -202,10 +203,9 @@ export default function NewProductPage() {
                         </Button>
                       </form>
                     )}
-                    
-                    {/* Steps 2 and 3 for the form */}
                     {step > 1 && (
-                        <div className="space-y-6">
+                        <div className="space-y-6 pt-4 border-t">
+                            <CardTitle>Step 3: Review & Save</CardTitle>
                             {step === 2 && (
                                 <>
                                   {isGenerating ? (
@@ -238,9 +238,9 @@ export default function NewProductPage() {
                                        </div>
                                     </div>
                                   )}
-                                  <div className="flex gap-4">
+                                  <div className="flex gap-4 pt-4 border-t">
                                      <Button variant="outline" onClick={() => setStep(1)} disabled={isGenerating}>
-                                        <ArrowLeft className="mr-2 h-4 w-4" /> Back
+                                        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Form
                                      </Button>
                                      <Button onClick={() => setStep(3)} disabled={isGenerating}>
                                         {isGenerating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait...</> : "Looks Good, Next Step"}
@@ -248,11 +248,10 @@ export default function NewProductPage() {
                                   </div>
                                 </>
                             )}
-
                             {step === 3 && (
                                 <div>
-                                  <p className="mb-4">Your product is ready to be saved as a draft. You can publish it later.</p>
-                                   <div className="flex gap-4">
+                                  <p className="mb-4 text-sm text-muted-foreground">Your product is ready to be saved as a draft. You can publish it from the 'My Products' page.</p>
+                                   <div className="flex gap-4 pt-4 border-t">
                                      <Button variant="outline" onClick={() => setStep(2)} disabled={isSaving}>
                                         <ArrowLeft className="mr-2 h-4 w-4" /> Back to Edit
                                      </Button>
@@ -265,18 +264,17 @@ export default function NewProductPage() {
                             )}
                         </div>
                     )}
-                  </div>
-                  
-                  {/* --- Method 2: Conversational Chat --- */}
-                  <div>
-                    <h3 className="font-semibold mb-4">Method 2: Guided Chat</h3>
-                    <ChatCreator imageUrl={formData.imageUrl} />
-                  </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                </TabsContent>
+                <TabsContent value="chat">
+                    {/* --- Method 2: Conversational Chat --- */}
+                    <div className="pt-4 border-t">
+                        <ChatCreator imageUrl={formData.imageUrl} />
+                    </div>
+                </TabsContent>
+              </CardContent>
+          </Card>
+        </Tabs>
+      )}
     </div>
   );
 }

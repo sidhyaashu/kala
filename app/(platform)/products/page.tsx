@@ -6,15 +6,12 @@ import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
-// We only import the component itself, not the type from the client file.
 import { ProductCardActions } from "@/components/product-card-actions";
 
 // Revalidate this page every 60 seconds to fetch fresh data
 export const revalidate = 60;
 
 export default async function ProductsPage() {
-    // SOLUTION: Remove the incorrect type assertion. 
-    // Let TypeScript infer the type from Prisma, where `createdAt` is a Date object.
     const products = await prisma.product.findMany({
         orderBy: {
             createdAt: 'desc',
@@ -42,7 +39,6 @@ export default async function ProductsPage() {
                 </Card>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
-                    {/* The 'product' parameter is now correctly inferred as Prisma's Product type */}
                     {products.map((product) => (
                         <Card key={product.id} className="flex flex-col overflow-hidden">
                             <div className="relative w-full h-48 bg-muted">
@@ -77,13 +73,10 @@ export default async function ProductsPage() {
                                         {product.description}
                                     </p>
                                 </CardContent>
-                                {/* 
-                                  SOLUTION: The conversion from Date to string happens here, at the boundary.
-                                  This creates a new object that matches the type expected by the client component.
-                                */}
+                                {/* The CardFooter is now inside ProductCardActions */}
                                 <ProductCardActions product={{
                                     ...product,
-                                    createdAt: product.createdAt.toISOString(), // Use toISOString() for a standard string format
+                                    createdAt: product.createdAt.toISOString(),
                                 }} />
                             </div>
                         </Card>

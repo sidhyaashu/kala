@@ -1,8 +1,8 @@
-// File: components/product-card-actions.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { 
@@ -50,6 +50,8 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isGeneratingPost, setIsGeneratingPost] = useState(false);
   const [marketingPost, setMarketingPost] = useState("");
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [promoImage, setPromoImage] = useState("");
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -100,11 +102,30 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
     }
   }
 
+  const generatePromoImage = async () => {
+    setIsGeneratingImage(true);
+    setPromoImage("");
+    try {
+        const response = await fetch('/api/generate-promo-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: product.name, description: product.description }),
+        });
+        if (!response.ok) throw new Error("Failed to generate image.");
+        const data = await response.json();
+        setPromoImage(data.imageBase64);
+    } catch (error) {
+        toast.error("AI failed to generate image. Please try again.");
+    } finally {
+        setIsGeneratingImage(false);
+    }
+  }
+
   return (
     <CardFooter className="flex justify-between items-center pt-6">
       {product.status === 'DRAFT' ? (
         <Button onClick={handlePublish} disabled={isPublishing} className="bg-blue-600 hover:bg-blue-700">
-          {isPublishing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {isPublishing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Publish
         </Button>
       ) : (
@@ -115,29 +136,38 @@ export function ProductCardActions({ product }: ProductCardActionsProps) {
                     Promote
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>AI-Generated Social Media Post</DialogTitle>
-                    <DialogDescription>Copy this content to your social media.</DialogDescription>
+                    <DialogTitle>Promote "{product.name}"</DialogTitle>
+                    <DialogDescription>Use these AI-generated assets for your social media.</DialogDescription>
                 </DialogHeader>
-                {isGeneratingPost ? (
-                    <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-                ) : (
-                    <div className="relative">
-                        <Textarea value={marketingPost} readOnly rows={10} className="bg-muted pr-10" />
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="absolute top-2 right-2 h-7 w-7"
-                            onClick={() => {
-                                navigator.clipboard.writeText(marketingPost);
-                                toast.success("Post copied to clipboard!");
-                            }}
-                        >
-                            <Copy className="h-4 w-4" />
-                        </Button>
+                <div className="grid md:grid-cols-2 gap-6 pt-4">
+                    {/* Social Media Post Section */}
+                    <div>
+                        <h3 className="font-semibold mb-2">Social Media Post</h3>
+                        {isGeneratingPost ? ( <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> ) : (
+                            <div className="relative">
+                                <Textarea value={marketingPost} readOnly rows={10} className="bg-muted pr-10" />
+                                <Button size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7" onClick={() => { navigator.clipboard.writeText(marketingPost); toast.success("Post copied!"); }}>
+                                    <Copy className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
                     </div>
-                )}
+                    {/* Promotional Image Section */}
+                    <div>
+                        <h3 className="font-semibold mb-2">Promotional Poster</h3>
+                        <div className="relative aspect-square w-full bg-muted rounded-lg flex items-center justify-center">
+                            {isGeneratingImage ? (
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            ) : promoImage ? (
+                                <Image src={`data:image/png;base64,${promoImage}`} alt="AI generated poster" fill className="object-contain rounded-lg" />
+                            ) : (
+                                <Button onClick={generatePromoImage}>Generate Poster</Button>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </DialogContent>
         </Dialog>
       )}

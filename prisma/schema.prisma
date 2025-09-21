@@ -25,3 +25,13 @@ model Product {
   imageUrl      String?
   artisanNotes  String?
 }
+
+model ArtisanProfile {
+  id           String    @id @default("main_artisan")
+  name         String?   // Make name optional initially
+  bio          String?   // Make bio optional initially
+  profileImage String?   // NEW: Add a field for a profile picture
+  storyNotes   String?   // NEW: Field to store the artisan's raw story
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
