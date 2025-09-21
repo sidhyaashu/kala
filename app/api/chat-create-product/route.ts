@@ -3,16 +3,6 @@ import { NextResponse } from 'next/server';
 import { VertexAI } from '@google-cloud/vertexai';
 import prisma from '@/lib/prisma';
 
-const vertex_ai = new VertexAI({
-  project: process.env.GOOGLE_PROJECT_ID!,
-  location: "us-central1",
-  googleAuthOptions: {
-    credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS!),
-  }
-});
-
-const model = process.env.MODEL as string;
-const generativeModel = vertex_ai.getGenerativeModel({ model });
 
 // This will act as our "agent" to guide the conversation
 const systemInstruction = `
@@ -33,6 +23,24 @@ export async function POST(request: Request) {
   const { history, message } = await request.json();
 
   try {
+
+    if (!process.env.GOOGLE_CREDENTIALS || !process.env.GOOGLE_PROJECT_ID || !process.env.MODEL) {
+        throw new Error("Google Cloud environment variables are not configured.");
+    }
+
+    const vertex_ai = new VertexAI({
+      project: process.env.GOOGLE_PROJECT_ID,
+      location: "us-central1",
+      googleAuthOptions: {
+        credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+      }
+    });
+
+    const model = process.env.MODEL as string;
+    const generativeModel = vertex_ai.getGenerativeModel({ model });
+
+
+
     const chat = generativeModel.startChat({
       history,
       systemInstruction: {
