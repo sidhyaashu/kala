@@ -1,31 +1,31 @@
-// File: app/[locale]/(platform)/layout.tsx
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Toaster } from "@/components/ui/sonner";
-// IMPORT TrendingUp ICON
 import { Home, Package, PlusCircle, Menu, Settings, TrendingUp, Ship } from "lucide-react"; 
 import { LanguageSwitcher } from "@/components/language-switcher";
 
-export default async function PlatformLayout({
-  children,
-}: {
+type Props = {
   children: React.ReactNode;
-}) {
+  params: Promise<{ locale: string }>;
+};
 
-const navItems = [
-    { href: "/dashboard", icon: Home, label: "Dashboard" },
-    { href: "/logistics", icon: Ship, label: "Logistics" },
-    { href: "/trends", icon: TrendingUp, label: "Market Trends" },
-    { href: "/products", icon: Package, label: "My Products" },
-    { href: "/products/new", icon: PlusCircle, label: "Add New Product" },
-    { href: "/settings", icon: Settings, label: "Settings" },
+export default async function PlatformLayout({ children }: Props) {
+  // const { locale } = await params;
+
+  const navItems = [
+    { href: `/dashboard`, icon: Home, label: "Dashboard" },
+    { href: `/logistics`, icon: Ship, label: "Logistics" },
+    { href: `/trends`, icon: TrendingUp, label: "Market Trends" },
+    { href: `/products`, icon: Package, label: "My Products" },
+    { href: `/products/new`, icon: PlusCircle, label: "Add New Product" },
+    { href: `/settings`, icon: Settings, label: "Settings" },
   ];
 
   const SidebarContent = () => (
     <div className="flex h-full max-h-screen flex-col gap-2">
       <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+        <Link href={`/dashboard`} className="flex items-center gap-2 font-semibold">
           <span className="text-purple-600 font-bold">Artisan AI</span>
         </Link>
       </div>
@@ -53,8 +53,8 @@ const navItems = [
       </div>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-           <div className="md:hidden">
-             <Sheet>
+          <div className="md:hidden">
+            <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="shrink-0">
                   <Menu className="h-5 w-5" />
@@ -62,10 +62,10 @@ const navItems = [
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col p-0">
-                 <SidebarContent />
+                <SidebarContent />
               </SheetContent>
             </Sheet>
-           </div>
+          </div>
           <div className="w-full flex-1 flex items-center justify-end gap-4">
             <span className="font-semibold hidden md:inline-block">Hello, Sidhya</span>
             <LanguageSwitcher />

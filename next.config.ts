@@ -1,12 +1,4 @@
-// File: next.config.ts
-
 import type { NextConfig } from "next";
-import createNextIntlPlugin from 'next-intl/plugin';
-
-// THE FINAL FIX: Explicitly tell the plugin where your i18n configuration is.
-// This is necessary because your file is named `i18n.ts` and is in the root,
-// which is not the default location the plugin looks for.
-const withNextIntl = createNextIntlPlugin('./i18n.ts');
 
 const nextConfig: NextConfig = {
   eslint: { ignoreDuringBuilds: true },
@@ -20,4 +12,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default nextConfig;

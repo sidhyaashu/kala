@@ -5,19 +5,15 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/loader";
-import { useTranslations } from "next-intl";
-import { useLocale } from 'next-intl';
 
 export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
-   const locale = useLocale();
   const router = useRouter();
-  const t = useTranslations("LandingPage");
 
   const handleEnter = () => {
     setIsLoading(true);
     setTimeout(() => {
-      router.push(`/${locale}/dashboard`);
+      router.push('/dashboard');
     }, 1500);
   };
 
@@ -33,10 +29,10 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-orange-600/50" />
         <div className="relative z-10 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-            {t('title')}
+            From Your Hands to the World's Hearts
           </h1>
           <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto">
-            {t('subtitle')}
+            Let our AI assistant handle the marketing, storytelling, and sales, so you can focus on your craft.
           </p>
           
           <Button 
@@ -44,7 +40,7 @@ export default function LandingPage() {
             size="lg" 
             className="mt-12 w-full max-w-xs bg-amber-500 text-black hover:bg-amber-400 font-bold text-lg py-6 px-8 animate-bounce"
           >
-            {t('button')}
+            Enter Your Workshop ✨
           </Button>
         </div>
       </section>
