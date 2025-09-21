@@ -7,7 +7,7 @@ const vertex_ai = new VertexAI({
   location: "us-central1",
 });
 
-const model = "gemini-2.0-flash";
+const model = process.env.MODEL as string;
 
 const generativeModel = vertex_ai.getGenerativeModel({ model });
 

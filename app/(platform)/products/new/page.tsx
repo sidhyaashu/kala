@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Check, Image as ImageIcon, Loader2, Wand2, X } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Image as ImageIcon, Loader2, Wand2, X } from "lucide-react";
 import { toast } from "sonner";
 import type { PutBlobResult } from '@vercel/blob';
 
@@ -131,35 +131,47 @@ export default function NewProductPage() {
 
   // --- Render ---
   return (
-    <div>
+ <div>
       <h1 className="text-lg font-semibold md:text-2xl">Add New Product</h1>
       <Card className="mt-6">
         <CardHeader>
-            <CardTitle>
-                {step === 1 && "Step 1: Tell Us About Your Craft"}
-                {step === 2 && "Step 2: AI-Powered Generation"}
-                {step === 3 && "Step 3: Review & Save"}
-            </CardTitle>
+          <CardTitle>
+            {step === 1 && "Step 1: Tell Us About Your Craft"}
+            {step === 2 && "Step 2: AI-Powered Generation"}
+            {step === 3 && "Step 3: Review & Save"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {step === 1 && (
             <form onSubmit={handleGenerate} className="grid gap-6">
               <div>
                 <Label htmlFor="photos">Product Photo</Label>
-                <Input id="photos" type="file" ref={inputFileRef} onChange={handleFileChange} className="hidden" accept="image/*" />
+                <Input id="photos" type="file" ref={inputFileRef} onChange={handleFileChange} className="hidden" accept="image/*"/>
+                
+                {/* MODIFIED: Don't render image, show success state instead */}
                 {formData.imageUrl ? (
-                    <div className="mt-2 relative w-fit">
-                        <Image src={formData.imageUrl} alt="Uploaded product" width={150} height={150} className="rounded-md border object-cover aspect-square" />
-                        <Button type="button" size="icon" variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => setFormData(prev => ({...prev, imageUrl: ''}))}>
+                    <div className="mt-2 flex items-center gap-3 p-4 border rounded-md bg-green-500/10 border-green-500/20">
+                        <CheckCircle2 className="h-8 w-8 text-green-600" />
+                        <div>
+                            <p className="font-semibold text-green-700">Image Uploaded!</p>
+                            <p className="text-xs text-muted-foreground">You can now proceed to the next step.</p>
+                        </div>
+                         <Button type="button" size="icon" variant="ghost" className="ml-auto h-7 w-7 text-muted-foreground" onClick={() => setFormData(prev => ({...prev, imageUrl: ''}))}>
                             <X className="h-4 w-4" />
                         </Button>
                     </div>
                 ) : (
-                    <Button type="button" variant="outline" className="mt-2 w-full h-32 border-dashed flex flex-col" onClick={() => inputFileRef.current?.click()} disabled={isUploading}>
-                        {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <><ImageIcon className="h-8 w-8 text-muted-foreground" /><span className="mt-2 text-sm text-muted-foreground">Click to upload</span></>}
+                    <Button type="button" variant="outline" className="mt-2 w-full h-32 border-dashed flex-col" onClick={() => inputFileRef.current?.click()} disabled={isUploading}>
+                        {isUploading ? <Loader2 className="h-6 w-6 animate-spin" /> : 
+                        <>
+                            <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                            <span className="mt-2 text-sm text-muted-foreground">Click to upload photo</span>
+                        </>
+                        }
                     </Button>
                 )}
               </div>
+              
               <div>
                 <Label htmlFor="story">Your Story (Voice or Text)</Label>
                 <Textarea 
@@ -171,6 +183,7 @@ export default function NewProductPage() {
                     required
                 />
               </div>
+
               <div>
                 <Label htmlFor="min-price">Your Minimum Price (in ₹)</Label>
                 <Input 
@@ -181,14 +194,16 @@ export default function NewProductPage() {
                     required
                 />
               </div>
-              <Button type="submit" className="w-full md:w-auto" disabled={isUploading}>
-                {isUploading ? 'Uploading...' : <><Wand2 className="mr-2 h-4 w-4" /> Generate with AI</>}
+
+              <Button type="submit" className="w-full md:w-auto" disabled={isUploading || !formData.imageUrl}>
+                {isUploading ? 'Waiting for upload...' : <><Wand2 className="mr-2 h-4 w-4" /> Generate with AI</>}
               </Button>
             </form>
           )}
 
+          {/* Steps 2 and 3 do not need changes */}
           {step === 2 && (
-            <div className="grid gap-6">
+             <div className="grid gap-6">
               {isGenerating ? (
                 <>
                   <Skeleton className="h-8 w-3/4" />
@@ -201,14 +216,14 @@ export default function NewProductPage() {
                    <div>
                         <Label>Generated Product Title</Label>
                         <Input 
-                            value={formData.aiData?.title || ''} 
+                            value={formData.aiData?.title} 
                             onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, title: e.target.value}}))}
                         />
                    </div>
                    <div>
                         <Label>SEO-Friendly Description</Label>
                         <Textarea 
-                            value={formData.aiData?.description || ''} 
+                            value={formData.aiData?.description} 
                             rows={6} 
                             onChange={(e) => setFormData(prev => ({...prev, aiData: {...prev.aiData!, description: e.target.value}}))}
                         />
@@ -216,7 +231,7 @@ export default function NewProductPage() {
                    <div>
                         <Label>Keywords / Tags</Label>
                         <div className="flex flex-wrap gap-2 mt-2">
-                            {formData.aiData?.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                            {formData.aiData?.tags.map(tag => <Badge key={tag}>{tag}</Badge>)}
                         </div>
                    </div>
                     <div>
@@ -236,10 +251,10 @@ export default function NewProductPage() {
               </div>
             </div>
           )}
-          
+
           {step === 3 && (
             <div>
-              <p className="mb-4">Your product is ready to be saved as a draft. You can publish it from the 'My Products' page.</p>
+              <p className="mb-4">Your product is ready to be saved as a draft. You can publish it later.</p>
                <div className="flex gap-4">
                  <Button variant="outline" onClick={() => setStep(2)} disabled={isSaving}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Edit

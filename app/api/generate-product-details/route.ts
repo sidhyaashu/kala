@@ -5,7 +5,7 @@ const vertex_ai = new VertexAI({
   project: process.env.GOOGLE_PROJECT_ID!,
   location: "us-central1",
 });
-const model = "gemini-2.0-flash"; // Or any other suitable model
+const model = process.env.MODEL_IMG as string; // Or any other suitable model
 const generativeModel = vertex_ai.getGenerativeModel({
   model: model,
   generationConfig: {
