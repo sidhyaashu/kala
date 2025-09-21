@@ -12,11 +12,30 @@ const vertex_ai = new VertexAI({
 const model = process.env.MODEL_IMAGEN as string;
 const generativeModel = vertex_ai.preview.getGenerativeModel({ model });
 
+async function safeGenerate(prompt: string, maxRetries = 3) {
+  let delay = 3000; // start with 3s
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await generativeModel.generateContent(prompt);
+      return result;
+    } catch (err: any) {
+      if (err.code === 429) {
+        console.warn(`Quota exceeded (attempt ${attempt}/${maxRetries}). Retrying in ${delay}ms...`);
+        if (attempt === maxRetries) throw err;
+        await new Promise(res => setTimeout(res, delay));
+        delay *= 2; // exponential backoff
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
 export async function POST(request: Request) {
   const { name, description } = await request.json();
 
   if (!name || !description) {
-      return NextResponse.json({ error: "Name and description are required" }, { status: 400 });
+    return NextResponse.json({ error: "Name and description are required" }, { status: 400 });
   }
 
   const prompt = `
@@ -27,29 +46,34 @@ export async function POST(request: Request) {
   `;
 
   try {
-    const result = await generativeModel.generateContent(prompt);
+    const result = await safeGenerate(prompt);
 
-    // Add a guard clause to safely handle cases where the response is blocked by safety filters
-    if (!result.response.candidates || result.response.candidates.length === 0) {
-      console.error("Imagen response blocked or empty. Response:", JSON.stringify(result.response));
-      throw new Error("The AI model did not return a valid response, it may have been blocked.");
+    if (!result?.response?.candidates || result.response.candidates.length === 0) {
+      console.error("Imagen response blocked or empty:", JSON.stringify(result?.response));
+      throw new Error("The AI model did not return a valid response, it may have been blocked by safety filters.");
     }
 
     const response = result.response.candidates[0];
 
-    // The image data is in a specific field; we use @ts-ignore as types might not be fully updated
-    // @ts-ignore
+    // @ts-ignore - field may differ depending on SDK version
     const imageBase64 = response.customPrediction?.bytesBase64Encoded;
 
     if (!imageBase64) {
-      throw new Error("Imagen did not return a valid image in the response payload.");
+      throw new Error("Imagen did not return a valid image payload.");
     }
 
     return NextResponse.json({ imageBase64 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating promo image with Imagen:", error);
-    // Return a more specific error message to the client
-    const errorMessage = error instanceof Error ? error.message : "Failed to generate AI image.";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+
+    let status = 500;
+    let message = "Failed to generate AI image.";
+
+    if (error.code === 429) {
+      status = 429;
+      message = "Quota exceeded for Imagen API. Try again later or request a quota increase.";
+    }
+
+    return NextResponse.json({ error: message }, { status });
   }
 }

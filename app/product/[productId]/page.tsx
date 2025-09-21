@@ -1,3 +1,5 @@
+// File: app/product/[productId]/page.tsx
+
 import prisma from "@/lib/prisma";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -15,9 +17,15 @@ type Props = {
 
 // --- Dynamic Metadata Generation ---
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  // --- START OF FIX ---
+  // Destructure productId from params first to satisfy Next.js
+  const { productId } = params;
+
   const product = await prisma.product.findUnique({
-    where: { id: params.productId },
+    // Use the new variable here
+    where: { id: productId },
   });
+  // --- END OF FIX ---
 
   if (!product) {
     return {
@@ -34,8 +42,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // --- Page Component ---
 export default async function ProductPage({ params }: Props) {
-    const product = await prisma.product.findUnique({
-        where: { id: params.productId, status: 'LIVE' }, // Only show LIVE products
+    const { productId } = params;
+
+    // Correctly using findFirst to allow multiple 'where' conditions
+    const product = await prisma.product.findFirst({
+        where: { id: productId, status: 'LIVE' },
     });
 
     if (!product) {
