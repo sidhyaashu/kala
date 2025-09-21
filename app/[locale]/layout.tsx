@@ -14,24 +14,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// Pre-generate locales
+// This is correct and necessary.
 export function generateStaticParams() {
-  return [{ locale: "en" }, { locale: "hi" }];
+  return [{ locale: 'en' }, { locale: 'hi' }];
 }
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Kala AI",
   description: "AI-Powered Marketplace Assistant for Local Artisans",
 };
 
 export default async function RootLayout({
   children,
-  params,
+  params
 }: Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale: string }>; // 👈 treat as async
+  params: { locale: string };
 }>) {
-  const { locale } = await params; // 👈 await is required
+  // This pattern is correct for Next.js 15.
+  const { locale } = await params;
+
+  // THIS IS THE CRITICAL CHANGE:
+  // We explicitly pass the resolved `locale` to `getMessages`.
+  // This removes any ambiguity and ensures the correct message file is loaded.
   const messages = await getMessages({ locale });
 
   return (
@@ -46,4 +51,3 @@ export default async function RootLayout({
     </html>
   );
 }
-
