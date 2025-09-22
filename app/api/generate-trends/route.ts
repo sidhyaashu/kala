@@ -8,7 +8,7 @@ const vertex_ai = new VertexAI({
   googleAuthOptions: { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS!) }
 });
 
-const model = process.env.MODEL as string;
+const model = process.env.MODEL || "gemini-2.0-flash-001";
 const generativeModel = vertex_ai.getGenerativeModel({ model });
 
 // In a real-world scenario, you might fetch this data from a database

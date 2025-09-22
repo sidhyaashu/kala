@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       }
     });
 
-    const model = process.env.MODEL as string;
+    const model = process.env.MODEL || "gemini-2.0-flash-001";
     const generativeModel = vertex_ai.getGenerativeModel({ model });
 
 

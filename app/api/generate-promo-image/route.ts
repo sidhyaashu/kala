@@ -9,7 +9,7 @@ const vertex_ai = new VertexAI({
 });
 
 // IMPORTANT: Note that we are using the 'preview' namespace for Imagen models
-const model = process.env.MODEL_IMAGEN as string;
+const model = process.env.MODEL_IMAGEN || "imagen-4.0-generate-001";
 const generativeModel = vertex_ai.preview.getGenerativeModel({ model });
 
 async function safeGenerate(prompt: string, maxRetries = 3) {

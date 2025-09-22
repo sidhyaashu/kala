@@ -36,7 +36,7 @@ const vertex_ai = new VertexAI({
   }
 });
 
-const model = process.env.MODEL_VISION as string; 
+const model = process.env.MODEL_VISION || "gemini-2.0-flash-001"; 
 const generativeModel = vertex_ai.getGenerativeModel({ model });
 
 export async function POST(request: Request) {
