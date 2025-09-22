@@ -14,7 +14,8 @@ const vertex_ai = new VertexAI({
   location: "us-central1",
   googleAuthOptions: { credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS!) }
 });
-const generativeModel = vertex_ai.getGenerativeModel({ model: process.env.MODEL as string });
+const model = process.env.MODEL || "gemini-2.0-flash-001"
+const generativeModel = vertex_ai.getGenerativeModel({ model:model });
 
 export async function POST() {
   try {
